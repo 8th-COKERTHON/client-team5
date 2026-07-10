@@ -63,7 +63,7 @@ export default function GlobeBackground({ altitude, focusLat, focusLng }: GlobeB
             />
           </div>
 
-          <div className="absolute inset-0" style={{ backgroundColor: 'rgba(18, 18, 18, 0.30)' }} />
+          <div className="absolute inset-0" style={{ backgroundColor: 'rgba(18, 18, 18, 0.50)' }} />
         </>
       )}
     </div>

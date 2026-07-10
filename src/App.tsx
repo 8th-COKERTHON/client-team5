@@ -3,6 +3,7 @@ import OnboardingScreen from '@/pages/JetLagCalculator/OnboardingScreen';
 import CurrentSleepTimeScreen from '@/pages/JetLagCalculator/CurrentSleepTimeScreen';
 
 import MobileFrame from './components/layout/MobileFrame';
+import DesiredSleepTimeScreen from './pages/JetLagCalculator/DesiredSleepTimeScreen';
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
         />
         <Route path="/jetlag/onboarding" element={<OnboardingScreen />} />
         <Route path="/jetlag/current-sleep-time" element={<CurrentSleepTimeScreen />} />
+        <Route path="/jetlag/desired-sleep-time" element={<DesiredSleepTimeScreen />} />
       </Routes>
     </MobileFrame>
   );
