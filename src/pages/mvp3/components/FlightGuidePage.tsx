@@ -1,7 +1,9 @@
 import backIcon from '@/assets/icons/back.svg';
 import closeIcon from '@/assets/icons/close.svg';
 import airplaneBackgroundIcon from '@/assets/images/airplane_bg.svg';
+import type { CurrentBoardingPassResponse } from '@/api/returnRoute';
 import { FLAG_URLS } from '../mocks/flagUrls';
+import { getBoardingPassView } from '../returnRouteAdapter';
 import FlagIcon from './FlagIcon';
 import MobileStatusBar from './MobileStatusBar';
 
@@ -9,6 +11,7 @@ interface FlightGuidePageProps {
   onBack: () => void;
   onClose: () => void;
   onStart: () => void;
+  boardingPass?: CurrentBoardingPassResponse;
 }
 
 interface GuideItem {
@@ -32,7 +35,16 @@ const GUIDE_ITEMS: GuideItem[] = [
   { eyebrow: 'ARRIVAL', title: '목표 시간에 일어나기', time: '09:30', color: '#3A55A9' },
 ];
 
-const FlightGuidePage = ({ onBack, onClose, onStart }: FlightGuidePageProps) => {
+const FlightGuidePage = ({ onBack, onClose, onStart, boardingPass }: FlightGuidePageProps) => {
+  const ticket = getBoardingPassView(boardingPass);
+  const departureCity = ticket.departureCity;
+  const arrivalCity = ticket.arrivalCity;
+  const guideItems: GuideItem[] = [
+    { ...GUIDE_ITEMS[0], time: ticket.caffeineCutoffTime },
+    { ...GUIDE_ITEMS[1], time: ticket.sleepPrepTime },
+    { ...GUIDE_ITEMS[2], time: ticket.bedtimeWindowStart, timeEnd: ticket.bedtimeWindowEnd },
+    { ...GUIDE_ITEMS[3], time: ticket.targetWaketime },
+  ];
   return (
     <main className="h-full w-full overflow-hidden bg-white text-[#101522]">
       <div className="mvp3-screen">
@@ -62,7 +74,7 @@ const FlightGuidePage = ({ onBack, onClose, onStart }: FlightGuidePageProps) => 
         <section className="mt-7">
           <p className="text-sm text-[#888]">총 8일 중</p>
           <span className="mt-3 inline-flex items-center justify-center rounded-[28px] bg-[#3A55A9] px-[20px] py-[6px] text-[16px] leading-[27px] font-medium text-white">
-            DAY 1
+            DAY {ticket.dayNumber}
           </span>
         </section>
 
@@ -70,9 +82,10 @@ const FlightGuidePage = ({ onBack, onClose, onStart }: FlightGuidePageProps) => 
           <div>
             <p className="text-[10px] tracking-[0.1em] text-[#9aa5bd]">FROM</p>
             <p className="font-oswald mt-2 flex items-center gap-1 text-[16px] font-bold whitespace-nowrap text-[#112757]">
-              <FlagIcon src={FLAG_URLS.india} alt="인도 국기" /> NEW DELHI
+              <FlagIcon src={departureCity?.flagUrl || FLAG_URLS.india} alt="출발지 국기" />{' '}
+              {departureCity?.cityNameEn ?? 'NEW DELHI'}
             </p>
-            <p className="mt-1 text-[10px] text-[#8b96ad]">DEL</p>
+            <p className="mt-1 text-[10px] text-[#8b96ad]">{departureCity?.airportCode ?? 'DEL'}</p>
           </div>
           <div className="relative flex h-10 w-[3.4rem] items-center justify-center">
             <img
@@ -84,22 +97,23 @@ const FlightGuidePage = ({ onBack, onClose, onStart }: FlightGuidePageProps) => 
           <div className="text-right">
             <p className="text-[10px] tracking-[0.1em] text-[#9aa5bd]">TO</p>
             <p className="font-oswald mt-2 flex items-center justify-end gap-1 text-[16px] font-bold whitespace-nowrap text-[#112757]">
-              DHAKA <FlagIcon src={FLAG_URLS.bangladesh} alt="방글라데시 국기" />
+              {arrivalCity?.cityNameEn ?? 'DHAKA'}{' '}
+              <FlagIcon src={arrivalCity?.flagUrl || FLAG_URLS.bangladesh} alt="도착지 국기" />
             </p>
-            <p className="mt-1 text-[10px] text-[#8b96ad]">DAC</p>
+            <p className="mt-1 text-[10px] text-[#8b96ad]">{arrivalCity?.airportCode ?? 'DAC'}</p>
           </div>
         </article>
 
         <h2 className="mt-8 text-[19.2px] font-bold">오늘의 비행 계획</h2>
 
         <ol className="mt-5 flex h-[281px] w-[341px] shrink-0 flex-col justify-center self-center rounded-[15px] bg-white px-[25px] py-[24px] shadow-[0_4px_20px_rgba(18,18,18,0.05)]">
-          {GUIDE_ITEMS.map((item, index) => (
+          {guideItems.map((item, index) => (
             <li
               key={item.eyebrow}
               className="grid h-[58px] shrink-0 grid-cols-[28px_1fr_auto] items-center gap-3"
             >
               <div className="relative flex h-[58px] items-center justify-center">
-                {index < GUIDE_ITEMS.length - 1 && (
+                {index < guideItems.length - 1 && (
                   <span
                     aria-hidden="true"
                     className="absolute top-1/2 h-[58px] border-l border-dashed border-[#b8caef]"

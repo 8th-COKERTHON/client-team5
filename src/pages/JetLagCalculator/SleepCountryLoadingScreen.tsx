@@ -12,7 +12,7 @@ const GLOBE_FOCUS_LAT = 10;
 const GLOBE_FOCUS_LNG = 20;
 const MIN_LOADING_MS = 3000; // 최소 3초는 로딩 화면 유지
 
-type LoadingOutcome = 'success' | 'error' | 'guestExhausted';
+type LoadingOutcome = 'success' | 'apiError' | 'guestExhausted';
 
 const SleepCountryLoadingScreen = () => {
   const navigate = useNavigate();
@@ -21,8 +21,8 @@ const SleepCountryLoadingScreen = () => {
   const desiredSleepTime = useSleepStore((state) => state.desiredSleepTime);
   const desiredWakeTime = useSleepStore((state) => state.desiredWakeTime);
   const setJetlagResult = useSleepStore((state) => state.setJetlagResult);
+  const setJetlagError = useSleepStore((state) => state.setJetlagError);
 
-  const [error, setError] = useState<string | null>(null);
   const [isGuestTrialExhausted, setIsGuestTrialExhausted] = useState(false);
   const pendingOutcomeRef = useRef<LoadingOutcome | null>(null);
 
@@ -32,17 +32,14 @@ const SleepCountryLoadingScreen = () => {
     const applyOutcome = () => {
       const outcome = pendingOutcomeRef.current;
 
-      if (outcome === 'success') {
-        navigate('/jetlag/result', { replace: true });
-        return;
-      }
-
       if (outcome === 'guestExhausted') {
         setIsGuestTrialExhausted(true);
         return;
       }
 
-      setError('결과를 불러오지 못했어요. 다시 시도해주세요.');
+      // 성공이든 일반 API 에러(500 등)든, 결과 화면으로 이동해서
+      // ResultScreen이 store의 jetlagResult / jetlagError를 보고 알맞은 화면을 그림
+      navigate('/jetlag/result', { replace: true });
     };
 
     const finishLoading = () => {
@@ -67,7 +64,8 @@ const SleepCountryLoadingScreen = () => {
           pendingOutcomeRef.current = 'guestExhausted';
           return;
         }
-        pendingOutcomeRef.current = 'error';
+        setJetlagError('국가를 찾을 수 없습니다.');
+        pendingOutcomeRef.current = 'apiError';
       })
       .finally(() => {
         finishLoading();
@@ -89,21 +87,6 @@ const SleepCountryLoadingScreen = () => {
           className="rounded-[0.75rem] bg-[#0D2571] px-[1.5rem] py-[0.75rem] text-white"
         >
           회원가입하기
-        </button>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-[1rem] bg-white px-[1.5rem]">
-        <p className="text-center text-[0.9375rem] text-[#1A1A1A]">{error}</p>
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="rounded-[0.75rem] bg-[#0D2571] px-[1.5rem] py-[0.75rem] text-white"
-        >
-          다시 시도하기
         </button>
       </div>
     );

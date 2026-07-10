@@ -4,7 +4,9 @@ import closeIcon from '@/assets/icons/close.svg';
 import shareIcon from '@/assets/icons/share.svg';
 import barcodeImage from '@/assets/images/barcode.svg';
 import ticketBackground from '@/assets/images/ticket_bg.svg';
+import type { CurrentBoardingPassResponse } from '@/api/returnRoute';
 import { FLAG_URLS } from '../mocks/flagUrls';
+import { getBoardingPassView } from '../returnRouteAdapter';
 import FlagIcon from './FlagIcon';
 import MobileStatusBar from './MobileStatusBar';
 import SleepSchedule from './SleepSchedule';
@@ -13,6 +15,7 @@ interface ReturnTicketPageProps {
   onBack: () => void;
   onClose: () => void;
   onPrepare: () => void;
+  boardingPass?: CurrentBoardingPassResponse;
 }
 
 const loadImage = (source: string) =>
@@ -23,8 +26,11 @@ const loadImage = (source: string) =>
     image.src = source;
   });
 
-const ReturnTicketPage = ({ onBack, onClose, onPrepare }: ReturnTicketPageProps) => {
+const ReturnTicketPage = ({ onBack, onClose, onPrepare, boardingPass }: ReturnTicketPageProps) => {
   const [isSaving, setSaving] = useState(false);
+  const ticket = getBoardingPassView(boardingPass);
+  const arrivalCity = ticket.arrivalCity;
+  const formattedDate = ticket.date.replaceAll('-', '.');
 
   const handleSaveTicket = async () => {
     setSaving(true);
@@ -51,15 +57,15 @@ const ReturnTicketPage = ({ onBack, onClose, onPrepare }: ReturnTicketPageProps)
       context.fillText('DATE', 36, 58);
       context.fillStyle = '#17223e';
       context.font = '700 13px ui-monospace, monospace';
-      context.fillText('2026.07.10 · FRI', 84, 58);
+      context.fillText(formattedDate, 84, 58);
       context.font = '34px sans-serif';
 
       context.fillStyle = '#102c7c';
       context.font = '900 66px ui-monospace, monospace';
-      context.fillText('DHAKA', 36, 132);
+      context.fillText(arrivalCity?.cityNameEn ?? 'DHAKA', 36, 132);
       context.fillStyle = '#7180a1';
       context.font = '14px "Pretendard Variable", Pretendard, sans-serif';
-      context.fillText('방글라데시 다카', 36, 184);
+      context.fillText(arrivalCity?.cityNameKo ?? '방글라데시 다카', 36, 184);
 
       context.fillStyle = '#173485';
       context.beginPath();
@@ -67,7 +73,7 @@ const ReturnTicketPage = ({ onBack, onClose, onPrepare }: ReturnTicketPageProps)
       context.fill();
       context.fillStyle = '#ffffff';
       context.font = '900 15px ui-monospace, monospace';
-      context.fillText('DAC', 47, 220);
+      context.fillText(arrivalCity?.airportCode ?? 'DAC', 47, 220);
 
       const drawSleepSchedule = (
         x: number,
@@ -93,8 +99,8 @@ const ReturnTicketPage = ({ onBack, onClose, onPrepare }: ReturnTicketPageProps)
         context.fillText(waketime, x, 362);
       };
 
-      drawSleepSchedule(36, 'CURRENT SLEEP', '03:00 AM', '10:00 AM', false);
-      drawSleepSchedule(204, 'TARGET SLEEP', '02:30 PM', '09:30 AM', true);
+      drawSleepSchedule(36, 'CURRENT SLEEP', ticket.currentBedtime, ticket.currentWaketime, false);
+      drawSleepSchedule(204, 'TARGET SLEEP', ticket.targetBedtime, ticket.targetWaketime, true);
       context.drawImage(barcode, 48, 410, 286, 66);
 
       const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
@@ -103,7 +109,7 @@ const ReturnTicketPage = ({ onBack, onClose, onPrepare }: ReturnTicketPageProps)
       const downloadUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = 'return-route-dhaka-2026-07-10.png';
+      link.download = `return-route-${arrivalCity?.cityNameEn.toLowerCase().replaceAll(' ', '-') ?? 'ticket'}-${ticket.date}.png`;
       link.click();
       URL.revokeObjectURL(downloadUrl);
     } finally {
@@ -157,33 +163,33 @@ const ReturnTicketPage = ({ onBack, onClose, onPrepare }: ReturnTicketPageProps)
               <p className="text-[15px] leading-[12px] tracking-[1.2px] text-[#8A97B0]">
                 DATE{' '}
                 <strong className="font-space-mono ml-2 text-[15px] leading-[13.5px] font-bold tracking-normal text-[#0D2571]">
-                  2026.07.10 · FRI
+                  {formattedDate}
                 </strong>
               </p>
               <FlagIcon
-                src={FLAG_URLS.bangladesh}
-                alt="방글라데시 국기"
+                src={arrivalCity?.flagUrl || FLAG_URLS.bangladesh}
+                alt={`${arrivalCity?.cityNameKo ?? '방글라데시'} 국기`}
                 className="h-[2.2rem] w-[3.3rem]"
               />
             </div>
             <h3 className="font-oswald mt-3 text-[70px] leading-[76px] font-bold tracking-[0.9px] text-[#0D2571]">
-              DHAKA
+              {arrivalCity?.cityNameEn ?? 'DHAKA'}
             </h3>
             <p className="font-noto-sans-kr mt-3 text-[15px] leading-[18px] text-[#5A6A8A]">
-              방글라데시 다카
+              {arrivalCity?.cityNameKo ?? '방글라데시 다카'}
             </p>
             <span className="font-oswald mt-3 inline-flex w-fit items-center justify-center rounded-[6px] bg-[#0D2571] px-[9px] py-[4px] text-[16.287px] leading-[24.431px] font-bold tracking-[0.977px] text-white">
-              DAC
+              {arrivalCity?.airportCode ?? 'DAC'}
             </span>
 
             <div className="mt-1 grid grid-cols-2 gap-[2.3rem]">
               <SleepSchedule
                 label="CURRENT SLEEP"
-                sleep={{ bedtime: '03:00', waketime: '10:00' }}
+                sleep={{ bedtime: ticket.currentBedtime, waketime: ticket.currentWaketime }}
               />
               <SleepSchedule
                 label="TARGET SLEEP"
-                sleep={{ bedtime: '14:30', waketime: '09:30' }}
+                sleep={{ bedtime: ticket.targetBedtime, waketime: ticket.targetWaketime }}
                 isTarget
               />
             </div>

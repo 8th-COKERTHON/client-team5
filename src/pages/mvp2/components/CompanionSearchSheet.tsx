@@ -2,9 +2,14 @@ import { useState, type PointerEvent } from 'react';
 import type { Friend } from '../types/friend';
 
 interface CompanionSearchSheetProps {
-  result: Friend;
+  errorMessage?: string;
+  hasNoSearchResult?: boolean;
+  isAdding?: boolean;
+  isSearching?: boolean;
+  result: Friend | null;
   onAddCompanion: (friend: Friend) => void;
   onClose: () => void;
+  onSearch: (loginId: string) => void;
 }
 
 const CLOSE_THRESHOLD = 72;
@@ -13,29 +18,40 @@ const getOffsetLabel = (offsetFromSeoul: number) => {
   const absoluteOffset = Math.abs(offsetFromSeoul);
 
   if (offsetFromSeoul === 0) {
-    return '서울과 같은 시간이에요.';
+    return '서울과 같은 시간대예요';
   }
 
   if (offsetFromSeoul < 0) {
-    return `서울보다 ${absoluteOffset}시간 느려요.`;
+    return `서울보다 ${absoluteOffset}시간 느려요`;
   }
 
-  return `서울보다 ${absoluteOffset}시간 빨라요.`;
+  return `서울보다 ${absoluteOffset}시간 빨라요`;
 };
 
 export const CompanionSearchSheet = ({
+  errorMessage = '',
+  hasNoSearchResult = false,
+  isAdding = false,
+  isSearching = false,
   result,
   onAddCompanion,
   onClose,
+  onSearch,
 }: CompanionSearchSheetProps) => {
-  const [companionId, setCompanionId] = useState('meangg');
-  const [hasSearched, setHasSearched] = useState(true);
+  const [companionId, setCompanionId] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
   const [startY, setStartY] = useState<number | null>(null);
   const [dragY, setDragY] = useState(0);
   const translateY = Math.max(0, dragY);
 
   const handleSearch = () => {
-    setHasSearched(companionId.trim().length > 0);
+    const loginId = companionId.trim();
+
+    setHasSearched(loginId.length > 0);
+
+    if (loginId) {
+      onSearch(loginId);
+    }
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
@@ -99,19 +115,40 @@ export const CompanionSearchSheet = ({
           />
           <button
             type="button"
-            className="h-[2.8125rem] rounded-[0.6875rem] border border-[#e6e6e6] px-[0.8rem] text-[0.78125rem] font-medium text-[#b7b7b7]"
+            className="h-[2.8125rem] rounded-[0.6875rem] border border-[#e6e6e6] px-[0.8rem] text-[0.78125rem] font-medium text-[#707070] disabled:cursor-not-allowed disabled:opacity-70"
             onClick={handleSearch}
+            disabled={isSearching}
           >
-            검색
+            {isSearching ? '검색 중' : '검색'}
           </button>
         </div>
       </div>
 
-      {hasSearched && (
+      {errorMessage && (
+        <p className="mt-3 text-[0.75rem] leading-[1.2rem] text-[#d94a4a]">
+          {errorMessage}
+        </p>
+      )}
+
+      {hasNoSearchResult && (
+        <p className="mt-[1.625rem] text-center font-['Pretendard'] text-[0.75rem] font-normal leading-[1.03125rem] text-[#99a1af]">
+          검색 결과가 없습니다.
+        </p>
+      )}
+
+      {hasSearched && result && (
         <article className="relative mt-4 h-[6.125rem] rounded-[0.625rem] bg-white px-[1.3125rem] py-5 shadow-[0_4px_20px_rgba(18,18,18,0.05)]">
           <div className="flex items-start gap-[0.6875rem]">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#f3f3f3] text-[1.6875rem] leading-none shadow-[0_4px_20px_rgba(18,18,18,0.05)]">
-              <span aria-hidden="true">{result.avatar}</span>
+            <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3f3f3] text-[1.6875rem] leading-none shadow-[0_4px_20px_rgba(18,18,18,0.05)]">
+              {result.profileImageUrl ? (
+                <img
+                  src={result.profileImageUrl}
+                  alt=""
+                  className="size-full object-cover"
+                />
+              ) : (
+                <span aria-hidden="true">{result.avatar}</span>
+              )}
             </div>
             <div className="min-w-0">
               <h2 className="text-[0.9375rem] font-semibold leading-[1.1] text-[#0d2571]">
@@ -121,16 +158,17 @@ export const CompanionSearchSheet = ({
                 {result.cityCode} / {result.countryName} {result.cityName}
               </p>
               <p className="text-[0.625rem] leading-[0.875rem] text-[#b7b7b7]">
-                {getOffsetLabel(result.offsetFromSeoul)}
+                {result.offsetLabel ?? getOffsetLabel(result.offsetFromSeoul)}
               </p>
             </div>
           </div>
           <button
             type="button"
-            className="absolute right-[1.5625rem] top-1/2 h-[1.875rem] w-[4.9375rem] -translate-y-1/2 rounded-[0.4375rem] bg-[#cbdaf8] text-[0.75rem] font-medium text-[#121212]"
+            className="absolute right-[1.5625rem] top-1/2 h-[1.875rem] w-[4.9375rem] -translate-y-1/2 rounded-[0.4375rem] bg-[#cbdaf8] text-[0.75rem] font-medium text-[#121212] disabled:cursor-not-allowed disabled:opacity-60"
             onClick={() => onAddCompanion(result)}
+            disabled={isAdding || result.alreadyCompanion}
           >
-            추가하기
+            {result.alreadyCompanion ? '추가 완료' : '추가하기'}
           </button>
         </article>
       )}

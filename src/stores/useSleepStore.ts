@@ -21,14 +21,14 @@ export interface JetlagSleepInfo {
 }
 
 export interface JetlagResult {
-  resultId: number;
+  resultId: number | null;
   from: JetlagCity;
   to: JetlagCity;
   currentSleep: JetlagSleepInfo;
   targetSleep: JetlagSleepInfo;
   jetlagMinutes: number;
   jetlagLabel: string;
-  direction: 'EAST' | 'WEST';
+  direction: 'EAST' | 'WEST' | 'SAME';
   resultDate: string;
 }
 
@@ -38,11 +38,13 @@ interface SleepState {
   desiredSleepTime: string;
   desiredWakeTime: string;
   jetlagResult: JetlagResult | null;
+  jetlagError: string | null;
   setSleepTime: (sleepTime: string) => void;
   setWakeTime: (wakeTime: string) => void;
   setDesiredSleepTime: (desiredSleepTime: string) => void;
   setDesiredWakeTime: (desiredWakeTime: string) => void;
   setJetlagResult: (result: JetlagResult) => void;
+  setJetlagError: (message: string) => void;
   resetSleepState: () => void;
 }
 
@@ -52,11 +54,13 @@ export const useSleepStore = create<SleepState>((set) => ({
   desiredSleepTime: DEFAULT_DESIRED_SLEEP_TIME,
   desiredWakeTime: DEFAULT_DESIRED_WAKE_TIME,
   jetlagResult: null,
+  jetlagError: null,
   setSleepTime: (sleepTime) => set({ sleepTime }),
   setWakeTime: (wakeTime) => set({ wakeTime }),
   setDesiredSleepTime: (desiredSleepTime) => set({ desiredSleepTime }),
   setDesiredWakeTime: (desiredWakeTime) => set({ desiredWakeTime }),
-  setJetlagResult: (jetlagResult) => set({ jetlagResult }),
+  setJetlagResult: (jetlagResult) => set({ jetlagResult, jetlagError: null }),
+  setJetlagError: (jetlagError) => set({ jetlagError, jetlagResult: null }),
   resetSleepState: () =>
     set({
       sleepTime: DEFAULT_SLEEP_TIME,
@@ -64,5 +68,6 @@ export const useSleepStore = create<SleepState>((set) => ({
       desiredSleepTime: DEFAULT_DESIRED_SLEEP_TIME,
       desiredWakeTime: DEFAULT_DESIRED_WAKE_TIME,
       jetlagResult: null,
+      jetlagError: null,
     }),
 }));
