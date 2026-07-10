@@ -47,7 +47,7 @@ export const FriendSheet = ({
 
   return (
     <section
-      className="absolute bottom-0 left-0 right-0 h-[27.3125rem] rounded-t-[1.875rem] border border-[#e0e0e0] bg-white px-9 pt-[2.8125rem] shadow-[0_4px_20px_rgba(18,18,18,0.05)] transition-transform duration-200"
+      className="absolute bottom-0 left-0 right-0 h-[25.4375rem] overflow-hidden rounded-t-[1.875rem] border border-[#e0e0e0] bg-white px-9 pt-[2.8125rem] shadow-[0_4px_20px_rgba(18,18,18,0.05)] transition-transform duration-200"
       style={{ transform: `translateY(${translateY}px)` }}
     >
       <button
@@ -69,14 +69,16 @@ export const FriendSheet = ({
       </div>
 
       {hasFriends ? (
-        <div className="mt-6 grid gap-[0.6875rem]">
-          {friends.map((friend) => (
-            <FriendCard
-              key={friend.id}
-              friend={friend}
-              onDelete={onDeleteFriend}
-            />
-          ))}
+        <div className="scrollbar-hidden absolute bottom-[6.5rem] left-0 right-0 top-[5.9375rem] overflow-y-auto overscroll-contain">
+          <div className="grid gap-3 px-9 pb-4">
+            {friends.map((friend) => (
+              <FriendCard
+                key={friend.id}
+                friend={friend}
+                onDelete={onDeleteFriend}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <FriendEmptyState />
