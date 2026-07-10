@@ -1,10 +1,13 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import settingIcon from '@/assets/icons/setting.svg';
 import homeEarth from '@/assets/images/home_earth.svg';
 
 const actionButtonClass =
   'flex h-[3.5625rem] w-[8.125rem] items-center justify-center border-[0.1875rem] border-[#cbdaf8] bg-[#121212] text-[1.4375rem] font-light text-[#cbdaf8]';
+
+const menuItemClass =
+  'block w-full text-center font-["Pretendard"] text-[1.0625rem] font-medium leading-[1.00975rem] text-white';
 
 interface HomeScreenProps {
   children?: ReactNode;
@@ -20,9 +23,43 @@ export const HomeScreen = ({
   onOpenFriends,
 }: HomeScreenProps) => {
   const navigate = useNavigate();
+  const [isMenuOpen, setMenuOpen] = useState(false);
+  const [isLogoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [isLoggedIn, setLoggedIn] = useState(() =>
+    Boolean(localStorage.getItem('accessToken')),
+  );
 
   const handleStartTrip = () => {
     navigate('/jetlag/onboarding');
+  };
+
+  const handleToggleMenu = () => {
+    setMenuOpen((currentIsMenuOpen) => !currentIsMenuOpen);
+  };
+
+  const handleCloseMenu = () => {
+    setMenuOpen(false);
+  };
+
+  const handleAuthMenuClick = () => {
+    if (isLoggedIn) {
+      setMenuOpen(false);
+      setLogoutDialogOpen(true);
+      return;
+    }
+
+    navigate('/login');
+  };
+
+  const handleCancelLogout = () => {
+    setLogoutDialogOpen(false);
+  };
+
+  const handleConfirmLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('grantType');
+    setLoggedIn(false);
+    setLogoutDialogOpen(false);
   };
 
   return (
@@ -48,10 +85,37 @@ export const HomeScreen = ({
             type="button"
             className="flex size-[1.875rem] items-center justify-center"
             aria-label="설정"
+            onClick={handleToggleMenu}
           >
             <img src={settingIcon} alt="" className="size-[1.875rem]" />
           </button>
         </div>
+
+        {isMenuOpen && (
+          <>
+            <button
+              type="button"
+              className="absolute inset-0 z-20 cursor-default"
+              aria-label="메뉴 닫기"
+              onClick={handleCloseMenu}
+            />
+            <nav className="absolute right-[1.5625rem] top-[4.3125rem] z-40 flex h-[8.875rem] w-[10.0625rem] flex-col items-start gap-[1.125rem] rounded-[0.9375rem] border border-white/20 bg-[#b7b7b7]/50 px-[1.3125rem] py-[1.4375rem] backdrop-blur-sm">
+              <button
+                type="button"
+                className={menuItemClass}
+                onClick={handleAuthMenuClick}
+              >
+                {isLoggedIn ? '로그아웃' : '로그인하기'}
+              </button>
+              <button type="button" className={menuItemClass}>
+                음악 on/off
+              </button>
+              <button type="button" className={menuItemClass}>
+                앱 정보
+              </button>
+            </nav>
+          </>
+        )}
 
         <img
           src={homeEarth}
@@ -79,6 +143,32 @@ export const HomeScreen = ({
             aria-label="바텀시트 닫기"
             onClick={onCloseSheet}
           />
+        )}
+
+        {isLogoutDialogOpen && (
+          <div className="absolute inset-0 z-50 bg-[#b7b7b7]/50">
+            <section className="absolute left-1/2 top-[20.6875rem] h-[10.5625rem] w-[21.5rem] -translate-x-1/2 rounded-[0.9375rem] bg-white px-[2.1875rem] py-[2.1875rem] text-[#121212]">
+              <p className="text-center text-[1.25rem] font-medium leading-6">
+                로그아웃 하시겠습니까?
+              </p>
+              <div className="mt-[1.875rem] flex gap-[1.0625rem]">
+                <button
+                  type="button"
+                  className="h-9 w-[8.0625rem] rounded-lg bg-[#f3f3f3] text-[0.9375rem] font-medium text-[#707070]"
+                  onClick={handleCancelLogout}
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  className="h-9 w-[8.0625rem] rounded-lg bg-[#6483d3] text-[0.9375rem] font-medium text-white"
+                  onClick={handleConfirmLogout}
+                >
+                  로그아웃
+                </button>
+              </div>
+            </section>
+          </div>
         )}
 
         {children}

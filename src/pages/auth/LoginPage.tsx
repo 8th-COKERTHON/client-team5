@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiError, login } from '@/api/auth';
+import closeIcon from '@/assets/icons/x.svg';
 
 const inputClassName =
   'h-[3.5625rem] w-full rounded-lg border border-[rgba(230,230,230,0.7)] bg-transparent px-[1.375rem] text-[0.9375rem] font-light leading-[1.4375rem] text-white outline-none placeholder:text-[rgba(230,230,230,0.7)]';
@@ -11,6 +12,10 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setLoading] = useState(false);
+
+  const handleCloseClick = () => {
+    navigate('/');
+  };
 
   const handleLogin = async () => {
     if (isLoading) {
@@ -52,6 +57,15 @@ const LoginPage = () => {
 
   return (
     <main className="relative h-full w-full overflow-hidden bg-[linear-gradient(180deg,#0d2571_8.59%,#121212_141.65%)] font-['Pretendard'] text-white">
+      <button
+        type="button"
+        className="absolute right-6 top-[4.375rem] z-10 flex size-8 items-center justify-center"
+        aria-label="홈으로 이동"
+        onClick={handleCloseClick}
+      >
+        <img src={closeIcon} alt="" className="size-[1.0625rem]" />
+      </button>
+
       <section className="absolute left-1/2 top-[6.1875rem] h-[20.1875rem] w-[19.75rem] -translate-x-1/2 bg-white">
         <span className="absolute left-20 top-[9.5625rem] text-[0.6875rem] leading-[1.168rem] text-black">
           로고 영역
