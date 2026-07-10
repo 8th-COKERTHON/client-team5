@@ -1,5 +1,5 @@
 import GlobeBackground from './components/GlobeBackground';
-import { AirplaneRoute } from './components/AirplaneRoute';
+import { AirplaneRoute } from './components/AirPlaneRoute';
 
 const GLOBE_ALTITUDE = 1.2;
 const GLOBE_FOCUS_LAT = 10;
