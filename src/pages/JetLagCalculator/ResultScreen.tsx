@@ -67,7 +67,7 @@ const ResultScreen = () => {
   };
 
   const handleRetryClick = () => {
-    navigate('/jetlag/current-sleep-time');
+    navigate('/login');
   };
 
   return (
