@@ -1,14 +1,49 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ApiError, login } from '@/api/auth';
 
 const inputClassName =
   'h-[3.5625rem] w-full rounded-lg border border-[rgba(230,230,230,0.7)] bg-transparent px-[1.375rem] text-[0.9375rem] font-light leading-[1.4375rem] text-white outline-none placeholder:text-[rgba(230,230,230,0.7)]';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // API schema 확인 후 /api/auth/login 연동 예정
+  const handleLogin = async () => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!userId.trim() || !password.trim()) {
+      setErrorMessage('아이디와 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    setErrorMessage('');
+    setLoading(true);
+
+    try {
+      const response = await login({
+        id: userId.trim(),
+        password,
+      });
+
+      localStorage.setItem('accessToken', response.accessToken);
+      localStorage.setItem('grantType', response.grantType);
+      navigate('/');
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      setErrorMessage('로그인 중 문제가 발생했어요.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignupClick = () => {
@@ -52,12 +87,19 @@ const LoginPage = () => {
           />
         </div>
 
+        {errorMessage && (
+          <p className="text-[0.8125rem] font-light leading-[1.2rem] text-[#ffb4b4]">
+            {errorMessage}
+          </p>
+        )}
+
         <button
           type="button"
-          className="h-[3.5625rem] w-full rounded-lg bg-[#6483d3] text-[1.125rem] font-medium leading-[1.4375rem] text-white"
+          className="h-[3.5625rem] w-full rounded-lg bg-[#6483d3] text-[1.125rem] font-medium leading-[1.4375rem] text-white disabled:cursor-not-allowed disabled:opacity-70"
           onClick={handleLogin}
+          disabled={isLoading}
         >
-          로그인
+          {isLoading ? '로그인 중' : '로그인'}
         </button>
       </section>
 
