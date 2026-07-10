@@ -1,31 +1,43 @@
 import { Routes, Route } from 'react-router-dom';
-import OnboardingScreen from '@/pages/JetLagCalculator/OnboardingScreen';
-import CurrentSleepTimeScreen from '@/pages/JetLagCalculator/CurrentSleepTimeScreen';
+import { Suspense, lazy } from 'react';
 
 import MobileFrame from './components/layout/MobileFrame';
-import DesiredSleepTimeScreen from './pages/JetLagCalculator/DesiredSleepTimeScreen';
 
 import { Mvp2Page } from '@/pages/mvp2/Mvp2Page';
+
+const OnboardingScreen = lazy(
+  () => import('@/pages/JetLagCalculator/OnboardingScreen'),
+);
+const CurrentSleepTimeScreen = lazy(
+  () => import('@/pages/JetLagCalculator/CurrentSleepTimeScreen'),
+);
+const DesiredSleepTimeScreen = lazy(
+  () => import('./pages/JetLagCalculator/DesiredSleepTimeScreen'),
+);
+
+const PendingJetLagScreen = () => null;
 
 const App = () => {
   return (
     <MobileFrame>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <main className="flex min-h-screen items-center justify-center bg-gray-100">
-              <h1 className="text-2xl font-bold">Client Team 5</h1>
-            </main>
-          }
-        />
-        <Route path="/jetlag/onboarding" element={<OnboardingScreen />} />
-        <Route path="/jetlag/current-sleep-time" element={<CurrentSleepTimeScreen />} />
-        <Route path="/jetlag/desired-sleep-time" element={<DesiredSleepTimeScreen />} />
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/jetlag/onboarding" element={<OnboardingScreen />} />
+          <Route
+            path="/jetlag/current-sleep-time"
+            element={<CurrentSleepTimeScreen />}
+          />
+          <Route
+            path="/jetlag/desired-sleep-time"
+            element={<DesiredSleepTimeScreen />}
+          />
+          <Route path="/jetlag/loading" element={<PendingJetLagScreen />} />
+          <Route path="/jetlag/result" element={<PendingJetLagScreen />} />
 
-        <Route path="/" element={<Mvp2Page />} />
-        <Route path="/mvp2" element={<Mvp2Page />} />
-      </Routes>
+          <Route path="/" element={<Mvp2Page />} />
+          <Route path="/mvp2" element={<Mvp2Page />} />
+        </Routes>
+      </Suspense>
     </MobileFrame>
   );
 };

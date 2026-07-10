@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import settingIcon from '@/assets/icons/setting.svg';
 import homeEarth from '@/assets/images/home_earth.svg';
 
@@ -18,9 +19,15 @@ export const HomeScreen = ({
   onCloseSheet,
   onOpenFriends,
 }: HomeScreenProps) => {
+  const navigate = useNavigate();
+
+  const handleStartTrip = () => {
+    navigate('/jetlag/onboarding');
+  };
+
   return (
-    <main className="min-h-screen bg-[#050814] px-4 py-6">
-      <section className="relative mx-auto min-h-[52.75rem] w-full max-w-[24.375rem] overflow-hidden bg-[#0d2571] text-white shadow-2xl">
+    <main className="h-full w-full bg-[#050814]">
+      <section className="relative h-full w-full overflow-hidden bg-[#0d2571] text-white">
         <div className="absolute left-0 right-0 top-0 z-10 flex h-[2.8125rem] items-center justify-between px-8 text-[0.9375rem] font-semibold">
           <span>9:41</span>
           <span className="text-xs tracking-[0.08em]" aria-hidden="true">
@@ -53,7 +60,11 @@ export const HomeScreen = ({
         />
 
         <div className="absolute left-1/2 top-[38.875rem] flex w-[18.75rem] -translate-x-1/2 items-center justify-between">
-          <button type="button" className={actionButtonClass}>
+          <button
+            type="button"
+            className={actionButtonClass}
+            onClick={handleStartTrip}
+          >
             여행가기
           </button>
           <button type="button" className={actionButtonClass}>

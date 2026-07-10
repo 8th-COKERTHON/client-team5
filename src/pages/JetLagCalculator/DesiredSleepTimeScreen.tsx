@@ -189,7 +189,7 @@ const DesiredSleepTimeScreen = () => {
 
       {/* 다음 버튼 */}
       <PrimaryButton
-        navigateTo="/jetlag/desired-sleep-time"
+        navigateTo="/jetlag/loading"
         wrapperClassName="fixed bottom-0 left-0 right-0 z-20 flex justify-center px-[1.25rem] pb-[calc(env(safe-area-inset-bottom)+3.75rem)]"
       >
         다음
