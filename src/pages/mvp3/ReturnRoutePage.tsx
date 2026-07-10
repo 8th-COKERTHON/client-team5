@@ -198,7 +198,8 @@ const ReturnRoutePage = () => {
               <p className="text-[20px] leading-[27px] font-semibold text-[#121212]">
                 지금 나는
                 <br />
-                <span className="font-semibold text-[#3A55A9]">인도 뉴델리</span>에 있어요.
+                <span className="font-semibold text-[#3A55A9]">{route.currentCity.cityNameKo}</span>
+                에 있어요.
               </p>
               <p className="mt-3 text-[13px] leading-5 tracking-[0.26px] text-[#707070]">
                 현재 수면 리듬을 조정해 서울로 돌아가볼까요?
