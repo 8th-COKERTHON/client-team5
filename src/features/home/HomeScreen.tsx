@@ -1,7 +1,13 @@
+import type { ReactNode } from 'react';
+
 const actionButtonClass =
   'flex h-[3.5625rem] w-[8.125rem] items-center justify-center border-[0.1875rem] border-[#cbdaf8] bg-[#121212] text-[1.4375rem] font-light text-[#cbdaf8]';
 
-export const HomeScreen = () => {
+interface HomeScreenProps {
+  children?: ReactNode;
+}
+
+export const HomeScreen = ({ children }: HomeScreenProps) => {
   return (
     <main className="min-h-screen bg-[#050814] px-4 py-6">
       <section className="relative mx-auto min-h-[52.75rem] w-full max-w-[24.375rem] overflow-hidden bg-gradient-to-b from-[#0d2571] from-[8%] to-[#121212] text-white shadow-2xl">
@@ -37,6 +43,8 @@ export const HomeScreen = () => {
             귀국하기
           </button>
         </div>
+
+        {children}
       </section>
     </main>
   );
