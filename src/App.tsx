@@ -1,15 +1,32 @@
-import { Route, Routes } from 'react-router-dom';
-import JetLagCalculatorPage from '@/pages/JetLagCalculator/JetLagCalculatorPage';
+import { Routes, Route } from 'react-router-dom';
+import OnboardingScreen from '@/pages/JetLagCalculator/OnboardingScreen';
+import CurrentSleepTimeScreen from '@/pages/JetLagCalculator/CurrentSleepTimeScreen';
+
+import MobileFrame from './components/layout/MobileFrame';
+import DesiredSleepTimeScreen from './pages/JetLagCalculator/DesiredSleepTimeScreen';
+
 import { Mvp2Page } from '@/pages/mvp2/Mvp2Page';
 
 const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Mvp2Page />} />
-      <Route path="/mvp2" element={<Mvp2Page />} />
-      <Route path="/jetlag" element={<JetLagCalculatorPage />} />
-    </Routes>
+    <MobileFrame>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <main className="flex min-h-screen items-center justify-center bg-gray-100">
+              <h1 className="text-2xl font-bold">Client Team 5</h1>
+            </main>
+          }
+        />
+        <Route path="/jetlag/onboarding" element={<OnboardingScreen />} />
+        <Route path="/jetlag/current-sleep-time" element={<CurrentSleepTimeScreen />} />
+        <Route path="/jetlag/desired-sleep-time" element={<DesiredSleepTimeScreen />} />
+
+        <Route path="/" element={<Mvp2Page />} />
+        <Route path="/mvp2" element={<Mvp2Page />} />
+      </Routes>
+    </MobileFrame>
   );
 };
-
 export default App;
