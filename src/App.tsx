@@ -1,17 +1,12 @@
-import { Routes, Route } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import JetLagCalculatorPage from '@/pages/JetLagCalculator/JetLagCalculatorPage';
+import { Mvp2Page } from '@/pages/mvp2/Mvp2Page';
 
 const App = () => {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <main className="flex min-h-screen items-center justify-center bg-gray-100">
-            <h1 className="text-2xl font-bold">Client Team 5</h1>
-          </main>
-        }
-      />
+      <Route path="/" element={<Mvp2Page />} />
+      <Route path="/mvp2" element={<Mvp2Page />} />
       <Route path="/jetlag" element={<JetLagCalculatorPage />} />
     </Routes>
   );
