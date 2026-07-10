@@ -33,6 +33,10 @@ export const HomeScreen = ({
     navigate('/jetlag/onboarding');
   };
 
+  const handleReturnTrip = () => {
+    navigate('/mvp3');
+  };
+
   const handleToggleMenu = () => {
     setMenuOpen((currentIsMenuOpen) => !currentIsMenuOpen);
   };
@@ -68,7 +72,7 @@ export const HomeScreen = ({
         <div className="absolute left-0 right-0 top-0 z-10 flex h-[2.8125rem] items-center justify-between px-8 text-[0.9375rem] font-semibold">
           <span>9:41</span>
           <span className="text-xs tracking-[0.08em]" aria-hidden="true">
-            ▮▮ ᯤ ▱
+            현지 시간
           </span>
         </div>
 
@@ -76,7 +80,7 @@ export const HomeScreen = ({
           <button
             type="button"
             className="flex size-[2.125rem] items-center justify-center text-[2.125rem] leading-none text-[#cbdaf8]"
-            aria-label="동행자 보기"
+            aria-label="동행 추가 보기"
             onClick={onOpenFriends}
           >
             +
@@ -108,10 +112,10 @@ export const HomeScreen = ({
                 {isLoggedIn ? '로그아웃' : '로그인하기'}
               </button>
               <button type="button" className={menuItemClass}>
-                음악 on/off
+                알림 on/off
               </button>
               <button type="button" className={menuItemClass}>
-                앱 정보
+                개인정보
               </button>
             </nav>
           </>
@@ -129,9 +133,13 @@ export const HomeScreen = ({
             className={actionButtonClass}
             onClick={handleStartTrip}
           >
-            여행가기
+            여행하기
           </button>
-          <button type="button" className={actionButtonClass}>
+          <button
+            type="button"
+            className={actionButtonClass}
+            onClick={handleReturnTrip}
+          >
             귀국하기
           </button>
         </div>
@@ -140,7 +148,7 @@ export const HomeScreen = ({
           <button
             type="button"
             className="absolute inset-0 z-20 cursor-default"
-            aria-label="바텀시트 닫기"
+            aria-label="시트 닫기"
             onClick={onCloseSheet}
           />
         )}
