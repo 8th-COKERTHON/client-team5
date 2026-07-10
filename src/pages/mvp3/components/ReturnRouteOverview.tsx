@@ -55,16 +55,21 @@ const ROUTE_STOPS = [
 
 const ReturnRouteOverview = ({ onBack, onConfirm, route, isLoading }: ReturnRouteOverviewProps) => {
   const routeStops = route
-    ? [route.departureCity, ...route.days.map((day) => day.checkpointCity)].filter(
-        (city, index, cities) =>
-          cities.findIndex((candidate) => candidate.airportCode === city.airportCode) === index,
-      ).map((city, index) => ({
-        cityName: city.cityNameEn,
-        airportCode: city.airportCode,
-        cityNameKo: `${city.countryName} ${city.cityNameKr}`,
-        flagUrl: getCountryFlagByCityName(city.cityNameEn),
-        gapLabel: index === 0 ? `-${Math.round(route.dailyAdjustMinutes * route.durationDays / 60)}시간` : `-${Math.max(1, Math.round((route.durationDays - index) * route.dailyAdjustMinutes / 60))}시간`,
-      }))
+    ? [route.departureCity, ...route.days.map((day) => day.checkpointCity)]
+        .filter(
+          (city, index, cities) =>
+            cities.findIndex((candidate) => candidate.airportCode === city.airportCode) === index,
+        )
+        .map((city, index) => ({
+          cityName: city.cityNameEn,
+          airportCode: city.airportCode,
+          cityNameKo: `${city.countryName} ${city.cityNameKr}`,
+          flagUrl: getCountryFlagByCityName(city.cityNameEn),
+          gapLabel:
+            index === 0
+              ? `-${Math.round((route.dailyAdjustMinutes * route.durationDays) / 60)}시간`
+              : `-${Math.max(1, Math.round(((route.durationDays - index) * route.dailyAdjustMinutes) / 60))}시간`,
+        }))
     : ROUTE_STOPS;
 
   return (

@@ -57,7 +57,9 @@ const BoardingCompletePage = ({
           >
             <img src={backIcon} alt="" className="h-5 w-5" />
           </button>
-          <h1 className="text-center text-[16px] leading-[27px] font-medium text-[#0D2571]">탑승 완료</h1>
+          <h1 className="text-center text-[16px] leading-[27px] font-medium text-[#0D2571]">
+            탑승 완료
+          </h1>
           <button
             type="button"
             aria-label="탑승 화면 닫기"
@@ -70,11 +72,13 @@ const BoardingCompletePage = ({
 
         <section className="mt-7">
           <h2 className="text-[20px] leading-[29px] font-bold">
-            <span className="text-[#3159b6]">{arrivalCity?.cityNameKo ?? '다카'}행 탑승</span>을<br />
+            <span className="text-[#3159b6]">{arrivalCity?.cityNameKo ?? '다카'}행 탑승</span>을
+            <br />
             시작할 시간이에요.
           </h2>
           <p className="mt-2 text-xs text-[#888]">
-            {departureCity?.airportCode ?? 'DEL'} → {arrivalCity?.airportCode ?? 'DAC'} · DAY {ticket.dayNumber}
+            {departureCity?.airportCode ?? 'DEL'} → {arrivalCity?.airportCode ?? 'DAC'} · DAY{' '}
+            {ticket.dayNumber}
           </p>
         </section>
 

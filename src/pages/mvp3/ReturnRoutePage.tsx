@@ -108,7 +108,9 @@ const ReturnRoutePage = () => {
       await fetchCompleteCurrentSleep();
       setCurrentStep('sleep-transition');
     } catch (error) {
-      setApiError(error instanceof Error ? error.message : '다음 경유지 도착을 처리하지 못했습니다.');
+      setApiError(
+        error instanceof Error ? error.message : '다음 경유지 도착을 처리하지 못했습니다.',
+      );
     } finally {
       setSubmitting(false);
     }
