@@ -2,10 +2,14 @@
 
 @theme {
   --color-White: #ffffff;
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 :root {
   font-family:
+    'Pretendard Variable',
     Pretendard,
     -apple-system,
     BlinkMacSystemFont,
@@ -36,4 +40,59 @@ body {
 
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
+}
+
+.font-oswald {
+  font-family: Oswald, 'Arial Narrow', sans-serif;
+}
+
+.font-space-mono {
+  font-family: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.font-noto-sans-kr {
+  font-family: 'Noto Sans KR', 'Pretendard Variable', Pretendard, sans-serif;
+}
+
+.mvp3-screen {
+  font-family: Pretendard, 'Pretendard Variable', sans-serif;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+  padding: 0 20px 57px;
+}
+
+.mvp3-status-space,
+.mvp3-status-bar {
+  height: 45px;
+  flex-shrink: 0;
+}
+
+.mvp3-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  color: #121212;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.mvp3-navbar {
+  display: flex;
+  width: 393px;
+  height: 52px;
+  max-width: calc(100vw + 3px);
+  margin-left: -20px;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.mvp3-navbar > h1 {
+  flex: 1;
 }
