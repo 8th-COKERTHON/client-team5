@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
-import JetLagCalculatorPage from '@/pages/JetLagCalculator/OnboardingScreen';
+import OnboardingScreen from '@/pages/JetLagCalculator/OnboardingScreen';
+import CurrentSleepTimeScreen from '@/pages/JetLagCalculator/CurrentSleepTimeScreen';
+
 import MobileFrame from './components/layout/MobileFrame';
 
 const App = () => {
@@ -14,7 +16,8 @@ const App = () => {
             </main>
           }
         />
-        <Route path="/jetlag" element={<JetLagCalculatorPage />} />
+        <Route path="/jetlag/onboarding" element={<OnboardingScreen />} />
+        <Route path="/jetlag/current-sleep-time" element={<CurrentSleepTimeScreen />} />
       </Routes>
     </MobileFrame>
   );

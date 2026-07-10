@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import Globe, { type GlobeMethods } from 'react-globe.gl';
-import { useElementSize } from '../../hooks/useElementSize';
-import { useGlobeStore } from '../../stores/useGlobeStore';
+import { useElementSize } from '../../../hooks/useElementSize';
+import { useGlobeStore } from '../../../stores/useGlobeStore';
 
 interface GlobeBackgroundProps {
   altitude?: number;
