@@ -85,8 +85,16 @@ export const FriendCard = ({ friend, onDelete }: FriendCardProps) => {
         onPointerUp={handlePointerUp}
       >
         <div className="flex items-start gap-[0.6875rem]">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#f3f3f3] text-[1.6875rem] leading-none shadow-[0_4px_20px_rgba(18,18,18,0.05)]">
-            <span aria-hidden="true">{friend.avatar}</span>
+          <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3f3f3] text-[1.6875rem] leading-none shadow-[0_4px_20px_rgba(18,18,18,0.05)]">
+            {friend.profileImageUrl ? (
+              <img
+                src={friend.profileImageUrl}
+                alt=""
+                className="size-full object-cover"
+              />
+            ) : (
+              <span aria-hidden="true">{friend.avatar}</span>
+            )}
           </div>
           <div className="min-w-0">
             <h2 className="text-[0.9375rem] font-semibold leading-[1.1] text-[#1e2939]">
@@ -96,7 +104,7 @@ export const FriendCard = ({ friend, onDelete }: FriendCardProps) => {
               {friend.cityCode} / {friend.countryName} {friend.cityName}
             </p>
             <p className="text-[0.625rem] leading-[0.875rem] text-[#b7b7b7]">
-              {getOffsetLabel(friend.offsetFromSeoul)}
+              {friend.offsetLabel ?? getOffsetLabel(friend.offsetFromSeoul)}
             </p>
           </div>
         </div>
