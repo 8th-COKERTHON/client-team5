@@ -1,12 +1,10 @@
 // pages/JetLagCalculator/ResultScreen.tsx
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSleepStore } from '../../stores/useSleepStore';
 import arrowLeftIcon from '../../assets/icons/arrow-left.svg';
 import ticketBackgroundImage from '../../assets/images/ticket-background.svg';
 
-const CARD_WIDTH = 342;
-const CARD_HEIGHT = 563;
 const BARCODE_WIDTH = 267.64;
 const BARCODE_HEIGHT = 66.91;
 const BARCODE_BOTTOM_OFFSET = 13;
@@ -46,15 +44,27 @@ const getCurrentDateLabel = (): string => {
 
 const ResultScreen = () => {
   const navigate = useNavigate();
+
   const currentSleepTime = useSleepStore((state) => state.sleepTime);
   const currentWakeTime = useSleepStore((state) => state.wakeTime);
   const targetSleepTime = useSleepStore((state) => state.desiredSleepTime);
   const targetWakeTime = useSleepStore((state) => state.desiredWakeTime);
+  const result = useSleepStore((state) => state.jetlagResult);
 
-  const result = MOCK_RESULT;
+  // API 응답 없이 결과 화면에 직접 진입한 경우 방어 (새로고침 등)
+  useEffect(() => {
+    if (!result) {
+      navigate('/jetlag/onboarding', { replace: true });
+    }
+  }, [result, navigate]);
+
   const dateLabel = useMemo(() => getCurrentDateLabel(), []);
-  const timeDifferenceHourLabel = Math.floor(result.timeDifferenceHour);
-  const timeDifferenceMinuteLabel = Math.round((result.timeDifferenceHour % 1) * 60);
+
+  if (!result) return null;
+
+  const timeDifferenceHourLabel = Math.floor(result.jetlagMinutes / 60);
+  const timeDifferenceMinuteLabel = result.jetlagMinutes % 60;
+  const isSlowerThanSeoul = result.direction === 'WEST';
 
   const handleBackClick = () => {
     navigate(-1);
@@ -105,7 +115,7 @@ const ResultScreen = () => {
           <span className="text-[#0D2571]">
             {timeDifferenceHourLabel}시간 {timeDifferenceMinuteLabel}분
           </span>{' '}
-          {result.isSlowerThanSeoul ? '느려요.' : '빨라요.'}
+          {isSlowerThanSeoul ? '느려요.' : '빨라요.'}
         </p>
       </div>
 
@@ -170,7 +180,7 @@ const ResultScreen = () => {
               letterSpacing: '0.9px',
             }}
           >
-            {result.countryNameEn}
+            {result.to.cityNameEn}
           </p>
 
           <p
@@ -184,7 +194,7 @@ const ResultScreen = () => {
               lineHeight: '18px',
             }}
           >
-            {result.countryNameKo}
+            {result.to.cityNameKr}
           </p>
 
           {/* 국가 코드 배지 */}
@@ -207,7 +217,7 @@ const ResultScreen = () => {
                 letterSpacing: '0.977px',
               }}
             >
-              {result.countryCode}
+              {result.to.airportCode}
             </span>
           </span>
 

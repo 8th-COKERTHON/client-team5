@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { getOrCreateDeviceId } from '../utils/devideId';
 
 interface ApiResponse<TData> {
   success: boolean;
@@ -92,6 +93,25 @@ export const authorizedApiRequest = async <TResponse>(
 
   if (authorizationValue) {
     headers.set('Authorization', authorizationValue);
+  }
+
+  return apiRequest<TResponse>(path, {
+    ...options,
+    headers,
+  });
+};
+
+export const apiRequestWithGuestFallback = async <TResponse>(
+  path: string,
+  options: RequestInit = {},
+): Promise<TResponse> => {
+  const headers = getRequestHeaders(options.headers);
+  const accessToken = getAccessToken();
+
+  if (accessToken) {
+    headers.set('Authorization', `Bearer ${accessToken}`);
+  } else {
+    headers.set('X-Device-Id', getOrCreateDeviceId());
   }
 
   return apiRequest<TResponse>(path, {
