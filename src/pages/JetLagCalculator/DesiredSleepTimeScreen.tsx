@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSleepStore } from '../../stores/useSleepStore';
 import arrowLeftIcon from '../../assets/icons/arrow-left.svg';
 import arrowDownIcon from '../../assets/icons/arrow-down.svg';
 import { PrimaryButton } from './components/PrimaryButton';
+import { TimePickerBottomSheet } from './components/TimePickerBottomSheet';
 
 const MINUTES_PER_HOUR = 60;
 const HOURS_PER_DAY = 24;
@@ -33,6 +34,11 @@ const DesiredSleepTimeScreen = () => {
   const navigate = useNavigate();
   const desiredSleepTime = useSleepStore((state) => state.desiredSleepTime);
   const desiredWakeTime = useSleepStore((state) => state.desiredWakeTime);
+  const setDesiredSleepTime = useSleepStore((state) => state.setDesiredSleepTime);
+  const setDesiredWakeTime = useSleepStore((state) => state.setDesiredWakeTime);
+
+  const [isSleepTimeSheetOpen, setIsSleepTimeSheetOpen] = useState(false);
+  const [isWakeTimeSheetOpen, setIsWakeTimeSheetOpen] = useState(false);
 
   const duration = useMemo(
     () => getSleepDurationLabel(desiredSleepTime, desiredWakeTime),
@@ -43,12 +49,17 @@ const DesiredSleepTimeScreen = () => {
     navigate(-1);
   };
 
-  const handleSleepTimeClick = () => {
-    // TODO: TimePickerBottomSheet 오픈 (setDesiredSleepTime 호출)
+  const handleSleepTimeClick = () => setIsSleepTimeSheetOpen(true);
+  const handleWakeTimeClick = () => setIsWakeTimeSheetOpen(true);
+
+  const handleSleepTimeConfirm = (value: string) => {
+    setDesiredSleepTime(value);
+    setIsSleepTimeSheetOpen(false);
   };
 
-  const handleWakeTimeClick = () => {
-    // TODO: TimePickerBottomSheet 오픈 (setDesiredWakeTime 호출)
+  const handleWakeTimeConfirm = (value: string) => {
+    setDesiredWakeTime(value);
+    setIsWakeTimeSheetOpen(false);
   };
 
   return (
@@ -198,6 +209,22 @@ const DesiredSleepTimeScreen = () => {
       >
         다음
       </PrimaryButton>
+
+      <TimePickerBottomSheet
+        isOpen={isSleepTimeSheetOpen}
+        title="희망 잠들기 시간 선택"
+        initialValue={desiredSleepTime}
+        onConfirm={handleSleepTimeConfirm}
+        onClose={() => setIsSleepTimeSheetOpen(false)}
+      />
+
+      <TimePickerBottomSheet
+        isOpen={isWakeTimeSheetOpen}
+        title="희망 기상 시간 선택"
+        initialValue={desiredWakeTime}
+        onConfirm={handleWakeTimeConfirm}
+        onClose={() => setIsWakeTimeSheetOpen(false)}
+      />
     </div>
   );
 };
