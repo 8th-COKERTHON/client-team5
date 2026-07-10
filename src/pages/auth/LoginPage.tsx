@@ -47,7 +47,7 @@ const LoginPage = () => {
   };
 
   const handleSignupClick = () => {
-    // 회원가입 화면 연결 예정
+    navigate('/signup');
   };
 
   return (
