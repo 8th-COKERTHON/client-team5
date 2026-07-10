@@ -45,11 +45,12 @@ const getCurrentDateLabel = (): string => {
 const ResultScreen = () => {
   const navigate = useNavigate();
 
+  const result = useSleepStore((state) => state.jetlagResult);
+
   const currentSleepTime = useSleepStore((state) => state.sleepTime);
   const currentWakeTime = useSleepStore((state) => state.wakeTime);
   const targetSleepTime = useSleepStore((state) => state.desiredSleepTime);
   const targetWakeTime = useSleepStore((state) => state.desiredWakeTime);
-  const result = useSleepStore((state) => state.jetlagResult);
 
   // API 응답 없이 결과 화면에 직접 진입한 경우 방어 (새로고침 등)
   useEffect(() => {
