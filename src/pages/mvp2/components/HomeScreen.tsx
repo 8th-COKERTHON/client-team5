@@ -13,7 +13,9 @@ export const HomeScreen = ({ children }: HomeScreenProps) => {
       <section className="relative mx-auto min-h-[52.75rem] w-full max-w-[24.375rem] overflow-hidden bg-gradient-to-b from-[#0d2571] from-[8%] to-[#121212] text-white shadow-2xl">
         <div className="absolute left-0 right-0 top-0 z-10 flex h-[2.8125rem] items-center justify-between px-8 text-[0.9375rem] font-semibold">
           <span>9:41</span>
-          <span className="text-xs tracking-[0.08em]">▮▮ ᯤ ▱</span>
+          <span className="text-xs tracking-[0.08em]" aria-hidden="true">
+            ▮▮ ᯤ ▱
+          </span>
         </div>
 
         <div className="absolute left-1/2 top-[4.3125rem] z-10 flex w-[21.375rem] -translate-x-1/2 items-center justify-between">

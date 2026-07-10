@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Friend } from '../../types/friend';
+import type { Friend } from '../types/friend';
 
 interface CompanionSearchSheetProps {
   result: Friend;

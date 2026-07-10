@@ -1,4 +1,4 @@
-import type { Friend } from '../../types/friend';
+import type { Friend } from '../types/friend';
 
 interface FriendCardProps {
   friend: Friend;
