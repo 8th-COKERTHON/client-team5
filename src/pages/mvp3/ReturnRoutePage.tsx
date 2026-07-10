@@ -1,6 +1,14 @@
 // MVP3-1 화면
-import { lazy, Suspense, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  fetchCompleteCurrentSleep,
+  fetchCreateReturnRoute,
+  fetchCurrentBoardingPass,
+  fetchCurrentReturnRoute,
+  type CurrentBoardingPassResponse,
+  type ReturnRouteResultResponse,
+} from '@/api/returnRoute';
 import backIcon from '@/assets/icons/back.svg';
 import closeIcon from '@/assets/icons/close.svg';
 import questionMarkIcon from '@/assets/icons/questionmark.svg';
@@ -11,25 +19,111 @@ import RouteCard from './components/RouteCard';
 import ReturnRouteOverview from './components/ReturnRouteOverview';
 import ReturnTicketPage from './components/ReturnTicketPage';
 import { MOCK_RETURN_ROUTE } from './mocks/returnRoute';
+import { mapCurrentRoute } from './returnRouteAdapter';
 
 const SleepGlobeTransition = lazy(() => import('./components/SleepGlobeTransition'));
 
 const ReturnRoutePage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isHelpOpen, setHelpOpen] = useState(false);
+  const [routeResponse, setRouteResponse] = useState<ReturnRouteResultResponse>();
+  const [boardingPass, setBoardingPass] = useState<CurrentBoardingPassResponse>();
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [apiError, setApiError] = useState('');
   const [currentStep, setCurrentStep] = useState<
     'setup' | 'overview' | 'ticket' | 'guide' | 'boarding' | 'sleep-transition'
   >('setup');
 
+  const route = routeResponse ? mapCurrentRoute(routeResponse) : MOCK_RETURN_ROUTE;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCurrentRoute = async () => {
+      try {
+        const currentRoute = await fetchCurrentReturnRoute();
+        if (isMounted) setRouteResponse(currentRoute);
+      } catch {
+        // 아직 생성된 귀국 루트가 없으면 최초 생성 화면을 그대로 보여줍니다.
+      }
+    };
+
+    void loadCurrentRoute();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleHelpClick = () => setHelpOpen((isOpen) => !isOpen);
-  const handleCreateClick = () => setCurrentStep('overview');
+  const handleCreateClick = async () => {
+    setApiError('');
+
+    if (routeResponse) {
+      setCurrentStep('overview');
+      return;
+    }
+
+    const storedResultId =
+      searchParams.get('resultId') ??
+      sessionStorage.getItem('resultId') ??
+      localStorage.getItem('resultId');
+    const resultId = Number(storedResultId);
+
+    if (!Number.isInteger(resultId) || resultId <= 0) {
+      setApiError('수면 시차 계산 결과가 없습니다. 계산 완료 후 다시 시도해주세요.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const createdRoute = await fetchCreateReturnRoute(resultId);
+      setRouteResponse(createdRoute);
+      setCurrentStep('overview');
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : '귀국 루트를 생성하지 못했습니다.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleConfirmRoute = async () => {
+    setApiError('');
+    setSubmitting(true);
+    try {
+      const currentBoardingPass = await fetchCurrentBoardingPass();
+      setBoardingPass(currentBoardingPass);
+      setCurrentStep('ticket');
+    } catch (error) {
+      setApiError(error instanceof Error ? error.message : '귀국 항공권을 불러오지 못했습니다.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSleep = async () => {
+    setApiError('');
+    setSubmitting(true);
+    try {
+      await fetchCompleteCurrentSleep();
+      setCurrentStep('sleep-transition');
+    } catch (error) {
+      setApiError(
+        error instanceof Error ? error.message : '다음 경유지 도착을 처리하지 못했습니다.',
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
   const handleClose = () => navigate('/');
 
   if (currentStep === 'overview') {
     return (
       <ReturnRouteOverview
         onBack={() => setCurrentStep('setup')}
-        onConfirm={() => setCurrentStep('ticket')}
+        onConfirm={handleConfirmRoute}
+        route={routeResponse}
+        isLoading={isSubmitting}
       />
     );
   }
@@ -40,6 +134,7 @@ const ReturnRoutePage = () => {
         onBack={() => setCurrentStep('overview')}
         onClose={handleClose}
         onPrepare={() => setCurrentStep('guide')}
+        boardingPass={boardingPass}
       />
     );
   }
@@ -50,6 +145,7 @@ const ReturnRoutePage = () => {
         onBack={() => setCurrentStep('ticket')}
         onClose={handleClose}
         onStart={() => setCurrentStep('boarding')}
+        boardingPass={boardingPass}
       />
     );
   }
@@ -59,7 +155,9 @@ const ReturnRoutePage = () => {
       <BoardingCompletePage
         onBack={() => setCurrentStep('guide')}
         onClose={handleClose}
-        onSleep={() => setCurrentStep('sleep-transition')}
+        onSleep={handleSleep}
+        boardingPass={boardingPass}
+        isLoading={isSubmitting}
       />
     );
   }
@@ -67,7 +165,11 @@ const ReturnRoutePage = () => {
   if (currentStep === 'sleep-transition') {
     return (
       <Suspense fallback={<main className="h-full w-full bg-[#071846]" />}>
-        <SleepGlobeTransition onComplete={handleClose} />
+        <SleepGlobeTransition
+          onComplete={handleClose}
+          departureCity={boardingPass?.departureCity}
+          arrivalCity={boardingPass?.arrivalCity}
+        />
       </Suspense>
     );
   }
@@ -96,7 +198,8 @@ const ReturnRoutePage = () => {
               <p className="text-[20px] leading-[27px] font-semibold text-[#121212]">
                 지금 나는
                 <br />
-                <span className="font-semibold text-[#3A55A9]">인도 뉴델리</span>에 있어요.
+                <span className="font-semibold text-[#3A55A9]">{route.currentCity.cityNameKo}</span>
+                에 있어요.
               </p>
               <p className="mt-3 text-[13px] leading-5 tracking-[0.26px] text-[#707070]">
                 현재 수면 리듬을 조정해 서울로 돌아가볼까요?
@@ -141,7 +244,7 @@ const ReturnRoutePage = () => {
                       DURATION
                     </p>
                     <strong className="mt-0.5 block text-[15px] leading-[22.5px] font-semibold text-[#3A55A9]">
-                      약 {MOCK_RETURN_ROUTE.durationDays}일
+                      약 {route.durationDays}일
                     </strong>
                   </div>
                 </div>
@@ -151,7 +254,7 @@ const ReturnRoutePage = () => {
                       DAILY ADJUST
                     </p>
                     <strong className="mt-0.5 block text-[15px] leading-[22.5px] font-semibold text-[#3A55A9]">
-                      약 {MOCK_RETURN_ROUTE.dailyAdjustMinutes}분
+                      약 {route.dailyAdjustMinutes}분
                     </strong>
                   </div>
                 </div>
@@ -161,16 +264,19 @@ const ReturnRoutePage = () => {
         </section>
 
         <div className="mt-8">
-          <RouteCard route={MOCK_RETURN_ROUTE} />
+          <RouteCard route={route} />
         </div>
+
+        {apiError && <p className="mt-3 text-center text-xs text-[#DD3232]">{apiError}</p>}
 
         <div className="mt-auto shrink-0 pt-10">
           <button
             type="button"
             onClick={handleCreateClick}
+            disabled={isSubmitting}
             className="h-[52px] w-full rounded-[8px] bg-[#0D2571] px-5 text-[15px] leading-[22.5px] font-medium text-white shadow-[0_4px_20px_rgba(18,18,18,0.05)] transition hover:bg-[#102b77]"
           >
-            서울행 귀국편 만들기
+            {isSubmitting ? '귀국 루트 생성 중' : '서울행 귀국편 만들기'}
           </button>
         </div>
       </div>

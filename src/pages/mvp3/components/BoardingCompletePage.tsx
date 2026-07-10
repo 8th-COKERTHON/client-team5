@@ -3,7 +3,9 @@ import backIcon from '@/assets/icons/back.svg';
 import closeIcon from '@/assets/icons/close.svg';
 import airplaneBackgroundIcon from '@/assets/images/airplane_bg.svg';
 import ticketBackground from '@/assets/images/ticket_bg2.svg';
+import type { CurrentBoardingPassResponse } from '@/api/returnRoute';
 import { FLAG_URLS } from '../mocks/flagUrls';
+import { getBoardingPassView } from '../returnRouteAdapter';
 import FlagIcon from './FlagIcon';
 import MobileStatusBar from './MobileStatusBar';
 
@@ -11,6 +13,8 @@ interface BoardingCompletePageProps {
   onBack: () => void;
   onClose: () => void;
   onSleep: () => void;
+  boardingPass?: CurrentBoardingPassResponse;
+  isLoading?: boolean;
 }
 
 const INITIAL_CHECKLIST = [
@@ -20,8 +24,17 @@ const INITIAL_CHECKLIST = [
   { itemId: 4, title: '알람 설정하기', isChecked: false },
 ];
 
-const BoardingCompletePage = ({ onBack, onClose, onSleep }: BoardingCompletePageProps) => {
+const BoardingCompletePage = ({
+  onBack,
+  onClose,
+  onSleep,
+  boardingPass,
+  isLoading,
+}: BoardingCompletePageProps) => {
   const [checklist, setChecklist] = useState(INITIAL_CHECKLIST);
+  const ticket = getBoardingPassView(boardingPass);
+  const departureCity = ticket.departureCity;
+  const arrivalCity = ticket.arrivalCity;
 
   const handleChecklistClick = (itemId: number) => {
     setChecklist((items) =>
@@ -44,7 +57,9 @@ const BoardingCompletePage = ({ onBack, onClose, onSleep }: BoardingCompletePage
           >
             <img src={backIcon} alt="" className="h-5 w-5" />
           </button>
-          <h1 className="text-center text-[16px] leading-[27px] font-medium text-[#0D2571]">탑승 완료</h1>
+          <h1 className="text-center text-[16px] leading-[27px] font-medium text-[#0D2571]">
+            탑승 완료
+          </h1>
           <button
             type="button"
             aria-label="탑승 화면 닫기"
@@ -57,10 +72,14 @@ const BoardingCompletePage = ({ onBack, onClose, onSleep }: BoardingCompletePage
 
         <section className="mt-7">
           <h2 className="text-[20px] leading-[29px] font-bold">
-            <span className="text-[#3159b6]">다카행 탑승</span>을<br />
+            <span className="text-[#3159b6]">{arrivalCity?.cityNameKo ?? '다카'}행 탑승</span>을
+            <br />
             시작할 시간이에요.
           </h2>
-          <p className="mt-2 text-xs text-[#888]">DEL → DAC · DAY 1</p>
+          <p className="mt-2 text-xs text-[#888]">
+            {departureCity?.airportCode ?? 'DEL'} → {arrivalCity?.airportCode ?? 'DAC'} · DAY{' '}
+            {ticket.dayNumber}
+          </p>
         </section>
 
         <article className="relative mt-6 aspect-[381/305] w-full">
@@ -69,7 +88,8 @@ const BoardingCompletePage = ({ onBack, onClose, onSleep }: BoardingCompletePage
             <p className="text-[8px] tracking-[0.13em] text-[#9299aa]">BOARDING PASS</p>
             <div className="mt-2 grid w-[68%] grid-cols-[1fr_auto_1fr] items-center gap-2">
               <p className="font-oswald flex items-center gap-1 text-[15.2px] font-bold text-[#112757]">
-                <FlagIcon src={FLAG_URLS.india} alt="인도 국기" /> DEL
+                <FlagIcon src={departureCity?.flagUrl || FLAG_URLS.india} alt="출발지 국기" />{' '}
+                {departureCity?.airportCode ?? 'DEL'}
               </p>
               <div className="relative flex h-6 w-9 items-center justify-center">
                 <img
@@ -79,21 +99,22 @@ const BoardingCompletePage = ({ onBack, onClose, onSleep }: BoardingCompletePage
                 />
               </div>
               <p className="font-oswald flex items-center justify-end gap-1 text-right text-[15.2px] font-bold text-[#112757]">
-                DAC <FlagIcon src={FLAG_URLS.bangladesh} alt="방글라데시 국기" />
+                {arrivalCity?.airportCode ?? 'DAC'}{' '}
+                <FlagIcon src={arrivalCity?.flagUrl || FLAG_URLS.bangladesh} alt="도착지 국기" />
               </p>
             </div>
             <div className="mt-8 grid grid-cols-2 gap-8">
               <div>
                 <p className="text-[8px] text-[#999]">목표 출발</p>
                 <strong className="mt-1 block font-mono text-[28.8px] leading-none text-[#102c7c]">
-                  02:30
+                  {ticket.targetBedtime}
                 </strong>
                 <p className="mt-1 text-[8px] text-[#888]">오전 (AM)</p>
               </div>
               <div>
                 <p className="text-[8px] text-[#999]">출발 가능 시간</p>
                 <strong className="mt-2 block font-mono text-[14.4px] text-[#777]">
-                  02:10 - 02:40
+                  {ticket.bedtimeWindowStart} - {ticket.bedtimeWindowEnd}
                 </strong>
               </div>
             </div>
@@ -128,9 +149,10 @@ const BoardingCompletePage = ({ onBack, onClose, onSleep }: BoardingCompletePage
         <button
           type="button"
           onClick={onSleep}
+          disabled={isLoading}
           className="mt-auto h-[52px] w-full shrink-0 rounded-[8px] bg-[#0D2571] px-5 text-[15px] leading-[22.5px] font-medium text-white shadow-[0_4px_20px_rgba(18,18,18,0.05)] transition hover:bg-[#102b77]"
         >
-          이제 잘게요
+          {isLoading ? '다음 경유지로 이동 중' : '이제 잘게요'}
         </button>
       </div>
     </main>
