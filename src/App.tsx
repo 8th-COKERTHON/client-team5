@@ -14,6 +14,8 @@ const CurrentSleepTimeScreen = lazy(
 const DesiredSleepTimeScreen = lazy(
   () => import('./pages/JetLagCalculator/DesiredSleepTimeScreen'),
 );
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const SignupPage = lazy(() => import('./pages/auth/SignupPage'));
 
 const PendingJetLagScreen = () => null;
 
@@ -34,6 +36,8 @@ const App = () => {
           <Route path="/jetlag/loading" element={<PendingJetLagScreen />} />
           <Route path="/jetlag/result" element={<PendingJetLagScreen />} />
 
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route path="/" element={<Mvp2Page />} />
           <Route path="/mvp2" element={<Mvp2Page />} />
         </Routes>
