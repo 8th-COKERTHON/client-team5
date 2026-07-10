@@ -1,17 +1,11 @@
-import { useNavigate } from 'react-router-dom';
 import GlobeBackground from './components/GlobeBackground';
+import { PrimaryButton } from './components/PrimaryButton';
 
 const GLOBE_ALTITUDE = 1.2;
 const GLOBE_FOCUS_LAT = 10;
 const GLOBE_FOCUS_LNG = 20;
 
 const OnboardingScreen = () => {
-  const navigate = useNavigate();
-
-  const handleStartClick = () => {
-    navigate('/jetlag/current-sleep-time');
-  };
-
   return (
     <div className="relative z-0 flex h-full w-full flex-col justify-end">
       {/* 배경 지구본 */}
@@ -36,16 +30,13 @@ const OnboardingScreen = () => {
         </div>
       </div>
 
-      <div className="relative z-10 flex justify-center px-[1.5rem] pb-[calc(env(safe-area-inset-bottom)+3.75rem)]">
-        <button
-          type="button"
-          onClick={handleStartClick}
-          className="mt-[1rem] flex w-full max-w-[21.25rem] items-center justify-center gap-[0.5rem] rounded-lg bg-[#0D2571] px-[1.25rem] py-[0.875rem] text-center font-['Pretendard'] text-[0.9375rem] leading-[1.40625rem] font-medium tracking-[0.15px] text-white"
-        >
-          내 수면시차 확인하기
-          <span aria-hidden>→</span>
-        </button>
-      </div>
+      <PrimaryButton
+        navigateTo="/jetlag/current-sleep-time"
+        wrapperClassName="fixed bottom-0 left-0 right-0 z-20 flex justify-center px-[1.25rem] pb-[calc(env(safe-area-inset-bottom)+3.75rem)]"
+        icon="→"
+      >
+        내 수면시차 확인하기
+      </PrimaryButton>
     </div>
   );
 };
