@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSleepStore } from '../../stores/useSleepStore';
 import arrowLeftIcon from '../../assets/icons/arrow-left.svg';
 import arrowDownIcon from '../../assets/icons/arrow-down.svg';
 import { PrimaryButton } from './components/PrimaryButton';
+import { TimePickerBottomSheet } from './components/TimePickerBottomSheet';
 
 const MINUTES_PER_HOUR = 60;
 const HOURS_PER_DAY = 24;
@@ -31,21 +32,34 @@ const getSleepDurationLabel = (sleepTime: string, wakeTime: string): string => {
 
 const DesiredSleepTimeScreen = () => {
   const navigate = useNavigate();
-  const sleepTime = useSleepStore((state) => state.sleepTime);
-  const wakeTime = useSleepStore((state) => state.wakeTime);
+  const desiredSleepTime = useSleepStore((state) => state.desiredSleepTime);
+  const desiredWakeTime = useSleepStore((state) => state.desiredWakeTime);
+  const setDesiredSleepTime = useSleepStore((state) => state.setDesiredSleepTime);
+  const setDesiredWakeTime = useSleepStore((state) => state.setDesiredWakeTime);
 
-  const duration = useMemo(() => getSleepDurationLabel(sleepTime, wakeTime), [sleepTime, wakeTime]);
+  const [isSleepTimeSheetOpen, setIsSleepTimeSheetOpen] = useState(false);
+  const [isWakeTimeSheetOpen, setIsWakeTimeSheetOpen] = useState(false);
+
+  const duration = useMemo(
+    () => getSleepDurationLabel(desiredSleepTime, desiredWakeTime),
+    [desiredSleepTime, desiredWakeTime],
+  );
 
   const handleBackClick = () => {
     navigate(-1);
   };
 
-  const handleSleepTimeClick = () => {
-    // TODO: TimePickerBottomSheet 오픈 (setSleepTime 호출)
+  const handleSleepTimeClick = () => setIsSleepTimeSheetOpen(true);
+  const handleWakeTimeClick = () => setIsWakeTimeSheetOpen(true);
+
+  const handleSleepTimeConfirm = (value: string) => {
+    setDesiredSleepTime(value);
+    setIsSleepTimeSheetOpen(false);
   };
 
-  const handleWakeTimeClick = () => {
-    // TODO: TimePickerBottomSheet 오픈 (setWakeTime 호출)
+  const handleWakeTimeConfirm = (value: string) => {
+    setDesiredWakeTime(value);
+    setIsWakeTimeSheetOpen(false);
   };
 
   return (
@@ -63,7 +77,7 @@ const DesiredSleepTimeScreen = () => {
 
         <div className="flex flex-1 gap-[0.375rem] px-[0.75rem]">
           <span className="h-[4px] w-[32px] rounded-[2px] bg-[var(--main-500,#0D2571)]" />
-          <span className="h-[4px] w-[32px] rounded-[2px] bg-gray-200" />
+          <span className="h-[4px] w-[32px] rounded-[2px] bg-[var(--main-500,#0D2571)]" />
         </div>
 
         <span
@@ -76,20 +90,21 @@ const DesiredSleepTimeScreen = () => {
             lineHeight: '18px',
           }}
         >
-          1/2
+          2/2
         </span>
       </div>
 
       {/* 타이틀 */}
       <h1 className="mt-[2rem] text-2xl leading-snug font-bold text-[#1A1A1A]">
-        요즘 몇 시에 자고
-        <br />몇 시에 일어나나요?
+        어떤 시간에 자고
+        <br />
+        일어나고 싶나요?
       </h1>
 
       <p className="mt-[0.75rem] text-sm leading-relaxed text-gray-500">
-        정확하지 않아도 괜찮아요.
+        내가 희망하는
         <br />
-        평소의 수면시간을 입력해주세요.
+        수면시간을 입력해주세요.
       </p>
 
       {/* 잠드는 시간 / 일어나는 시간 / 총 수면시간 컨테이너 */}
@@ -113,7 +128,7 @@ const DesiredSleepTimeScreen = () => {
                 textTransform: 'uppercase',
               }}
             >
-              잠드는 시간
+              희망 잠들기 시간
             </span>
             <button
               type="button"
@@ -130,7 +145,7 @@ const DesiredSleepTimeScreen = () => {
                   lineHeight: '30px',
                 }}
               >
-                {sleepTime}
+                {desiredSleepTime}
               </span>
               <ChevronDownIcon />
             </button>
@@ -156,7 +171,7 @@ const DesiredSleepTimeScreen = () => {
                 textTransform: 'uppercase',
               }}
             >
-              일어나는 시간
+              희망 기상 시간
             </span>
             <button
               type="button"
@@ -173,7 +188,7 @@ const DesiredSleepTimeScreen = () => {
                   lineHeight: '30px',
                 }}
               >
-                {wakeTime}
+                {desiredWakeTime}
               </span>
               <ChevronDownIcon />
             </button>
@@ -182,18 +197,34 @@ const DesiredSleepTimeScreen = () => {
 
         {/* 총 수면시간 */}
         <div className="flex w-full items-center justify-between self-stretch border-t border-dashed border-gray-200 pt-[1rem]">
-          <span className="text-sm text-gray-500">총 수면시간</span>
+          <span className="text-sm text-gray-500">목표 수면시간</span>
           <span className="text-lg font-bold text-[#0D2571]">{duration}</span>
         </div>
       </div>
 
       {/* 다음 버튼 */}
       <PrimaryButton
-        navigateTo="/jetlag/loading"
+        navigateTo="/jetlag/sleep-country-loading"
         wrapperClassName="fixed bottom-0 left-0 right-0 z-20 flex justify-center px-[1.25rem] pb-[calc(env(safe-area-inset-bottom)+3.75rem)]"
       >
         다음
       </PrimaryButton>
+
+      <TimePickerBottomSheet
+        isOpen={isSleepTimeSheetOpen}
+        title="희망 잠들기 시간 선택"
+        initialValue={desiredSleepTime}
+        onConfirm={handleSleepTimeConfirm}
+        onClose={() => setIsSleepTimeSheetOpen(false)}
+      />
+
+      <TimePickerBottomSheet
+        isOpen={isWakeTimeSheetOpen}
+        title="희망 기상 시간 선택"
+        initialValue={desiredWakeTime}
+        onConfirm={handleWakeTimeConfirm}
+        onClose={() => setIsWakeTimeSheetOpen(false)}
+      />
     </div>
   );
 };
