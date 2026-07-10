@@ -7,10 +7,17 @@ const actionButtonClass =
 
 interface HomeScreenProps {
   children?: ReactNode;
+  isSheetOpen?: boolean;
+  onCloseSheet?: () => void;
   onOpenFriends: () => void;
 }
 
-export const HomeScreen = ({ children, onOpenFriends }: HomeScreenProps) => {
+export const HomeScreen = ({
+  children,
+  isSheetOpen = false,
+  onCloseSheet,
+  onOpenFriends,
+}: HomeScreenProps) => {
   return (
     <main className="min-h-screen bg-[#050814] px-4 py-6">
       <section className="relative mx-auto min-h-[52.75rem] w-full max-w-[24.375rem] overflow-hidden bg-[#0d2571] text-white shadow-2xl">
@@ -53,6 +60,15 @@ export const HomeScreen = ({ children, onOpenFriends }: HomeScreenProps) => {
             귀국하기
           </button>
         </div>
+
+        {isSheetOpen && (
+          <button
+            type="button"
+            className="absolute inset-0 z-20 cursor-default"
+            aria-label="바텀시트 닫기"
+            onClick={onCloseSheet}
+          />
+        )}
 
         {children}
       </section>

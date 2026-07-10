@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { CompanionSearchSheet } from './components/CompanionSearchSheet';
 import { FriendSheet } from './components/FriendSheet';
 import { HomeScreen } from './components/HomeScreen';
@@ -45,22 +46,30 @@ export const Mvp2Page = () => {
   };
 
   return (
-    <HomeScreen onOpenFriends={handleOpenFriends}>
-      {sheetMode === 'friends' && (
-        <FriendSheet
-          friends={friends}
-          onClose={handleCloseSheet}
-          onDeleteFriend={handleDeleteFriend}
-          onInvite={handleOpenInvite}
-        />
-      )}
-      {sheetMode === 'search' && (
-        <CompanionSearchSheet
-          result={mockCompanionSearchResult}
-          onAddCompanion={handleAddCompanion}
-          onClose={handleCloseSheet}
-        />
-      )}
+    <HomeScreen
+      isSheetOpen={sheetMode !== 'hidden'}
+      onCloseSheet={handleCloseSheet}
+      onOpenFriends={handleOpenFriends}
+    >
+      <AnimatePresence>
+        {sheetMode === 'friends' && (
+          <FriendSheet
+            key="friends"
+            friends={friends}
+            onClose={handleCloseSheet}
+            onDeleteFriend={handleDeleteFriend}
+            onInvite={handleOpenInvite}
+          />
+        )}
+        {sheetMode === 'search' && (
+          <CompanionSearchSheet
+            key="search"
+            result={mockCompanionSearchResult}
+            onAddCompanion={handleAddCompanion}
+            onClose={handleCloseSheet}
+          />
+        )}
+      </AnimatePresence>
     </HomeScreen>
   );
 };
