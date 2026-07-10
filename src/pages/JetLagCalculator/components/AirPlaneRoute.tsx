@@ -1,14 +1,16 @@
 // components/AirplaneRoute.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { animate, useMotionValue } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import airplaneIcon from '../../../assets/icons/airplane.svg';
-import dottedLineIcon from '../../../assets/icons/dotted-line.svg';
 import mapLocationIcon from '../../../assets/icons/map-location.svg';
 
 const ROUTE_WIDTH = 220;
-const ROUTE_HEIGHT = 33.562;
+const ROUTE_HEIGHT = 30;
 const ROUTE_PATH_D = 'M0.369873 34.3123C78.8694 -10.1872 145.869 -10.687 220.37 34.3123';
-const ANIMATION_DURATION_MS = 2400;
+const ANIMATION_DURATION_SECOND = 2.4;
+const ANIMATION_DURATION_MS = ANIMATION_DURATION_SECOND * 1000;
+const ROTATION_SAMPLE_DISTANCE = 1;
 
 interface AirplaneRouteProps {
   /** 애니메이션 종료 후 이동할 경로 */
@@ -25,19 +27,63 @@ export const AirplaneRoute = ({
   onBeforeNavigate,
 }: AirplaneRouteProps) => {
   const navigate = useNavigate();
-  const [isPlaying, setIsPlaying] = useState(isAutoPlay);
+  const pathRef = useRef<SVGPathElement>(null);
+  const [pathLength, setPathLength] = useState(0);
+  const progress = useMotionValue(0);
+  const [airplaneTransform, setAirplaneTransform] = useState('translate(0px, 0px) rotate(0deg)');
 
+  // path의 전체 길이를 측정
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!pathRef.current) return;
+    setPathLength(pathRef.current.getTotalLength());
+  }, []);
+
+  // progress(0~1) motion value가 바뀔 때마다 비행기 위치와 각도를 path 위에서 직접 계산
+  useEffect(() => {
+    const updateAirplanePosition = (value: number) => {
+      if (!pathRef.current || pathLength === 0) return;
+
+      const currentDistance = value * pathLength;
+      const nextDistance = Math.min(currentDistance + ROTATION_SAMPLE_DISTANCE, pathLength);
+
+      const currentPoint = pathRef.current.getPointAtLength(currentDistance);
+      const nextPoint = pathRef.current.getPointAtLength(nextDistance);
+
+      const angleRadian = Math.atan2(nextPoint.y - currentPoint.y, nextPoint.x - currentPoint.x);
+      const angleDegree = (angleRadian * 180) / Math.PI;
+
+      setAirplaneTransform(
+        `translate(${currentPoint.x - 12}px, ${currentPoint.y - 12}px) rotate(${angleDegree}deg)`,
+      );
+    };
+
+    const unsubscribe = progress.on('change', updateAirplanePosition);
+    return () => unsubscribe();
+  }, [progress, pathLength]);
+
+  // Framer Motion으로 progress를 0 → 1까지 애니메이션
+  useEffect(() => {
+    if (!isAutoPlay || pathLength === 0) return;
+
+    const controls = animate(progress, 1, {
+      duration: ANIMATION_DURATION_SECOND,
+      ease: 'easeInOut',
+    });
+
+    return () => controls.stop();
+  }, [isAutoPlay, pathLength, progress]);
+
+  // 애니메이션 종료 후 화면 이동
+  useEffect(() => {
+    if (!isAutoPlay) return;
 
     const timer = setTimeout(() => {
-      setIsPlaying(false);
       onBeforeNavigate?.();
       navigate(navigateTo);
     }, ANIMATION_DURATION_MS);
 
     return () => clearTimeout(timer);
-  }, [isPlaying, navigate, navigateTo, onBeforeNavigate]);
+  }, [isAutoPlay, navigate, navigateTo, onBeforeNavigate]);
 
   return (
     <div
@@ -48,13 +94,22 @@ export const AirplaneRoute = ({
         marginTop: '12px',
       }}
     >
-      {/* 점선 경로 (배경) */}
-      <img
-        src={dottedLineIcon}
-        alt=""
+      {/* 점선 경로 (실제 path를 렌더링해서 좌표 계산에 사용) */}
+      <svg
+        width={ROUTE_WIDTH}
+        height={ROUTE_HEIGHT}
+        viewBox={`0 0 ${ROUTE_WIDTH} ${ROUTE_HEIGHT}`}
         className="absolute bottom-0 left-0"
-        style={{ width: `${ROUTE_WIDTH}px`, height: `${ROUTE_HEIGHT}px` }}
-      />
+      >
+        <path
+          ref={pathRef}
+          d={ROUTE_PATH_D}
+          stroke="#6483D3"
+          strokeWidth={1.5}
+          strokeDasharray="3 3"
+          fill="none"
+        />
+      </svg>
 
       {/* 도착 지점 핀 */}
       <img
@@ -74,14 +129,7 @@ export const AirplaneRoute = ({
         src={airplaneIcon}
         alt="비행기"
         className="absolute top-0 left-0"
-        style={{
-          width: '24px',
-          height: '24px',
-          offsetPath: `path('${ROUTE_PATH_D}')`,
-          offsetRotate: 'auto',
-          offsetDistance: isPlaying ? '100%' : '0%',
-          transition: isPlaying ? `offset-distance ${ANIMATION_DURATION_MS}ms ease-in-out` : 'none',
-        }}
+        style={{ width: '24px', height: '24px', transform: airplaneTransform }}
       />
     </div>
   );

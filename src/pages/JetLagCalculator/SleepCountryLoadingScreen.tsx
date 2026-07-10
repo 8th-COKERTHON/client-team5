@@ -15,8 +15,11 @@ const SleepCountryLoadingScreen = () => {
         focusLng={GLOBE_FOCUS_LNG}
       />
 
-      <div className="relative z-10 flex flex-1 items-center justify-center px-[1.5rem]">
-        <div className="inline-flex flex-col items-start font-['Pretendard']">
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-[1.5rem]">
+        {/* 비행기 애니메이션 */}
+        <AirplaneRoute navigateTo="/jetlag/result" />
+
+        <div className="mt-[2rem] inline-flex flex-col items-start font-['Pretendard']">
           <h1 className="text-center text-[1.5rem] leading-[2.1rem] font-bold text-[color:var(--White,#FFF)]">
             나의 수면 국가를
             <br />
