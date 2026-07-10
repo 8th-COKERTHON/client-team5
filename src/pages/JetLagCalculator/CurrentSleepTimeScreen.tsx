@@ -1,14 +1,14 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSleepStore } from '../../stores/useSleepStore';
 import arrowLeftIcon from '../../assets/icons/arrow-left.svg';
 import arrowDownIcon from '../../assets/icons/arrow-down.svg';
 import { PrimaryButton } from './components/PrimaryButton';
+import { TimePickerBottomSheet } from './components/TimePickerBottomSheet';
 
 const MINUTES_PER_HOUR = 60;
 const HOURS_PER_DAY = 24;
 
-// "오전 3:00" 같은 한국어 시간 라벨을 분(minute) 단위로 변환
 const parseKoreanTime = (label: string): number => {
   const match = label.match(/(오전|오후)\s*(\d{1,2}):(\d{2})/);
   if (!match) return 0;
@@ -33,6 +33,11 @@ const CurrentSleepTimeScreen = () => {
   const navigate = useNavigate();
   const sleepTime = useSleepStore((state) => state.sleepTime);
   const wakeTime = useSleepStore((state) => state.wakeTime);
+  const setSleepTime = useSleepStore((state) => state.setSleepTime);
+  const setWakeTime = useSleepStore((state) => state.setWakeTime);
+
+  const [isSleepTimeSheetOpen, setIsSleepTimeSheetOpen] = useState(false);
+  const [isWakeTimeSheetOpen, setIsWakeTimeSheetOpen] = useState(false);
 
   const duration = useMemo(() => getSleepDurationLabel(sleepTime, wakeTime), [sleepTime, wakeTime]);
 
@@ -41,11 +46,21 @@ const CurrentSleepTimeScreen = () => {
   };
 
   const handleSleepTimeClick = () => {
-    // TODO: TimePickerBottomSheet 오픈 (setSleepTime 호출)
+    setIsSleepTimeSheetOpen(true);
   };
 
   const handleWakeTimeClick = () => {
-    // TODO: TimePickerBottomSheet 오픈 (setWakeTime 호출)
+    setIsWakeTimeSheetOpen(true);
+  };
+
+  const handleSleepTimeConfirm = (value: string) => {
+    setSleepTime(value);
+    setIsSleepTimeSheetOpen(false);
+  };
+
+  const handleWakeTimeConfirm = (value: string) => {
+    setWakeTime(value);
+    setIsWakeTimeSheetOpen(false);
   };
 
   return (
@@ -97,7 +112,6 @@ const CurrentSleepTimeScreen = () => {
         className="mt-[2rem] flex flex-1 flex-col items-start justify-between self-stretch rounded-[10px] border border-[var(--Gray-100,#F3F3F3)] bg-white px-[20px] pt-[20px] pb-[16px]"
         style={{ boxShadow: '0 4px 20px 0 rgba(18, 18, 18, 0.05)' }}
       >
-        {/* 상단: 잠드는 시간 + 구분선 + 일어나는 시간 */}
         <div className="flex w-full flex-col gap-[0.5rem]">
           {/* 잠드는 시간 */}
           <div className="flex w-full flex-col gap-[0.5rem]">
@@ -194,6 +208,24 @@ const CurrentSleepTimeScreen = () => {
       >
         다음
       </PrimaryButton>
+
+      {/* 잠드는 시간 바텀시트 */}
+      <TimePickerBottomSheet
+        isOpen={isSleepTimeSheetOpen}
+        title="잠드는 시간 선택"
+        initialValue={sleepTime}
+        onConfirm={handleSleepTimeConfirm}
+        onClose={() => setIsSleepTimeSheetOpen(false)}
+      />
+
+      {/* 일어나는 시간 바텀시트 */}
+      <TimePickerBottomSheet
+        isOpen={isWakeTimeSheetOpen}
+        title="일어나는 시간 선택"
+        initialValue={wakeTime}
+        onConfirm={handleWakeTimeConfirm}
+        onClose={() => setIsWakeTimeSheetOpen(false)}
+      />
     </div>
   );
 };
