@@ -2,6 +2,8 @@ import arriveIcon from '@/assets/icons/arrive.svg';
 import backIcon from '@/assets/icons/back.svg';
 import nowIcon from '@/assets/icons/now.svg';
 import pinIcon from '@/assets/icons/pin.svg';
+import type { ReturnRouteResultResponse } from '@/api/returnRoute';
+import { getCountryFlagByCityName } from '@/lib/countryFlag';
 import { FLAG_URLS } from '../mocks/flagUrls';
 import FlagIcon from './FlagIcon';
 import MobileStatusBar from './MobileStatusBar';
@@ -9,6 +11,8 @@ import MobileStatusBar from './MobileStatusBar';
 interface ReturnRouteOverviewProps {
   onBack: () => void;
   onConfirm: () => void;
+  route?: ReturnRouteResultResponse;
+  isLoading?: boolean;
 }
 
 const ROUTE_STOPS = [
@@ -49,7 +53,25 @@ const ROUTE_STOPS = [
   },
 ] as const;
 
-const ReturnRouteOverview = ({ onBack, onConfirm }: ReturnRouteOverviewProps) => {
+const ReturnRouteOverview = ({ onBack, onConfirm, route, isLoading }: ReturnRouteOverviewProps) => {
+  const routeStops = route
+    ? [route.departureCity, ...route.days.map((day) => day.checkpointCity)]
+        .filter(
+          (city, index, cities) =>
+            cities.findIndex((candidate) => candidate.airportCode === city.airportCode) === index,
+        )
+        .map((city, index) => ({
+          cityName: city.cityNameEn,
+          airportCode: city.airportCode,
+          cityNameKo: `${city.countryName} ${city.cityNameKr}`,
+          flagUrl: getCountryFlagByCityName(city.cityNameEn),
+          gapLabel:
+            index === 0
+              ? `-${Math.round((route.dailyAdjustMinutes * route.durationDays) / 60)}시간`
+              : `-${Math.max(1, Math.round(((route.durationDays - index) * route.dailyAdjustMinutes) / 60))}시간`,
+        }))
+    : ROUTE_STOPS;
+
   return (
     <main className="h-full w-full overflow-hidden bg-white text-[#121212]">
       <div className="mvp3-screen">
@@ -81,9 +103,9 @@ const ReturnRouteOverview = ({ onBack, onConfirm }: ReturnRouteOverviewProps) =>
         </section>
 
         <ol className="mt-8 space-y-6">
-          {ROUTE_STOPS.map((stop, index) => {
+          {routeStops.map((stop, index) => {
             const isCurrent = index === 0;
-            const isArrival = index === ROUTE_STOPS.length - 1;
+            const isArrival = index === routeStops.length - 1;
 
             return (
               <li
@@ -139,9 +161,10 @@ const ReturnRouteOverview = ({ onBack, onConfirm }: ReturnRouteOverviewProps) =>
         <button
           type="button"
           onClick={onConfirm}
+          disabled={isLoading}
           className="mt-auto h-[52px] w-full shrink-0 rounded-[8px] bg-[#0D2571] px-5 text-[15px] leading-[22.5px] font-medium text-white shadow-[0_4px_20px_rgba(18,18,18,0.05)] transition hover:bg-[#102b77]"
         >
-          귀국 항공권 확인하기
+          {isLoading ? '귀국 항공권 불러오는 중' : '귀국 항공권 확인하기'}
         </button>
       </div>
     </main>

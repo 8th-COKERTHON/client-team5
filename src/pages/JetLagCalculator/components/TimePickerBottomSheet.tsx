@@ -1,5 +1,5 @@
 // pages/JetLagCalculator/components/TimePickerBottomSheet.tsx
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, type PanInfo } from 'framer-motion';
 
 const PERIOD_OPTIONS = ['오전', '오후'] as const;
@@ -51,13 +51,18 @@ export const TimePickerBottomSheet = ({
   const [selectedHour, setSelectedHour] = useState<number>(3);
   const [selectedMinute, setSelectedMinute] = useState<string>('00');
 
-  useEffect(() => {
-    if (!isOpen) return;
+  // isOpen이 true로 바뀔 때(혹은 열린 채로 initialValue가 바뀔 때) initialValue로 동기화한다.
+  // 렌더 중에 이전 key와 비교해 setState하므로 effect의 연쇄 렌더링을 피할 수 있다.
+  const syncKey = isOpen ? initialValue : null;
+  const [lastSyncedKey, setLastSyncedKey] = useState<string | null>(null);
+
+  if (isOpen && syncKey !== lastSyncedKey) {
     const parsed = parseTimeLabel(initialValue);
+    setLastSyncedKey(syncKey);
     setSelectedPeriod(parsed.period);
     setSelectedHour(parsed.hour);
     setSelectedMinute(parsed.minute);
-  }, [isOpen, initialValue]);
+  }
 
   const handleConfirmClick = () => {
     onConfirm(formatTimeLabel(selectedPeriod, selectedHour, selectedMinute));
