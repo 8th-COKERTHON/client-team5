@@ -1,7 +1,6 @@
 // components/AirplaneRoute.tsx
 import { useEffect, useRef, useState } from 'react';
 import { animate, useMotionValue } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import airplaneIcon from '../../../assets/icons/airplane.svg';
 import mapLocationIcon from '../../../assets/icons/map-location.svg';
 
@@ -9,24 +8,16 @@ const ROUTE_WIDTH = 220;
 const ROUTE_HEIGHT = 30;
 const ROUTE_PATH_D = 'M0.369873 34.3123C78.8694 -10.1872 145.869 -10.687 220.37 34.3123';
 const ANIMATION_DURATION_SECOND = 2.4;
-const ANIMATION_DURATION_MS = ANIMATION_DURATION_SECOND * 1000;
 const ROTATION_SAMPLE_DISTANCE = 1;
 
 interface AirplaneRouteProps {
-  /** 애니메이션 종료 후 이동할 경로 */
-  navigateTo: string;
   /** 애니메이션 자동 재생 여부 (기본: true) */
   isAutoPlay?: boolean;
-  /** 화면 이동 전에 실행할 부가 로직 (선택) */
-  onBeforeNavigate?: () => void;
+  /** 도착할 때마다 반복 재생할지 여부 (기본: true) */
+  isLooping?: boolean;
 }
 
-export const AirplaneRoute = ({
-  navigateTo,
-  isAutoPlay = true,
-  onBeforeNavigate,
-}: AirplaneRouteProps) => {
-  const navigate = useNavigate();
+export const AirplaneRoute = ({ isAutoPlay = true, isLooping = true }: AirplaneRouteProps) => {
   const pathRef = useRef<SVGPathElement>(null);
   const [pathLength, setPathLength] = useState(0);
   const progress = useMotionValue(0);
@@ -61,29 +52,22 @@ export const AirplaneRoute = ({
     return () => unsubscribe();
   }, [progress, pathLength]);
 
-  // Framer Motion으로 progress를 0 → 1까지 애니메이션
+  // Framer Motion으로 progress를 0 → 1까지 애니메이션 (필요 시 반복)
   useEffect(() => {
     if (!isAutoPlay || pathLength === 0) return;
 
     const controls = animate(progress, 1, {
       duration: ANIMATION_DURATION_SECOND,
       ease: 'easeInOut',
+      repeat: isLooping ? Infinity : 0,
+      repeatType: 'loop',
+      onRepeat: () => {
+        progress.set(0);
+      },
     });
 
     return () => controls.stop();
-  }, [isAutoPlay, pathLength, progress]);
-
-  // 애니메이션 종료 후 화면 이동
-  useEffect(() => {
-    if (!isAutoPlay) return;
-
-    const timer = setTimeout(() => {
-      onBeforeNavigate?.();
-      navigate(navigateTo);
-    }, ANIMATION_DURATION_MS);
-
-    return () => clearTimeout(timer);
-  }, [isAutoPlay, navigate, navigateTo, onBeforeNavigate]);
+  }, [isAutoPlay, isLooping, pathLength, progress]);
 
   return (
     <div
