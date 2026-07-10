@@ -31,21 +31,24 @@ const getSleepDurationLabel = (sleepTime: string, wakeTime: string): string => {
 
 const DesiredSleepTimeScreen = () => {
   const navigate = useNavigate();
-  const sleepTime = useSleepStore((state) => state.sleepTime);
-  const wakeTime = useSleepStore((state) => state.wakeTime);
+  const desiredSleepTime = useSleepStore((state) => state.desiredSleepTime);
+  const desiredWakeTime = useSleepStore((state) => state.desiredWakeTime);
 
-  const duration = useMemo(() => getSleepDurationLabel(sleepTime, wakeTime), [sleepTime, wakeTime]);
+  const duration = useMemo(
+    () => getSleepDurationLabel(desiredSleepTime, desiredWakeTime),
+    [desiredSleepTime, desiredWakeTime],
+  );
 
   const handleBackClick = () => {
     navigate(-1);
   };
 
   const handleSleepTimeClick = () => {
-    // TODO: TimePickerBottomSheet 오픈 (setSleepTime 호출)
+    // TODO: TimePickerBottomSheet 오픈 (setDesiredSleepTime 호출)
   };
 
   const handleWakeTimeClick = () => {
-    // TODO: TimePickerBottomSheet 오픈 (setWakeTime 호출)
+    // TODO: TimePickerBottomSheet 오픈 (setDesiredWakeTime 호출)
   };
 
   return (
@@ -131,7 +134,7 @@ const DesiredSleepTimeScreen = () => {
                   lineHeight: '30px',
                 }}
               >
-                {sleepTime}
+                {desiredSleepTime}
               </span>
               <ChevronDownIcon />
             </button>
@@ -174,7 +177,7 @@ const DesiredSleepTimeScreen = () => {
                   lineHeight: '30px',
                 }}
               >
-                {wakeTime}
+                {desiredWakeTime}
               </span>
               <ChevronDownIcon />
             </button>

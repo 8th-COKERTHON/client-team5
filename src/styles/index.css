@@ -1,5 +1,21 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Oswald';
+  src: url('../assets/fonts/Oswald-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Space Mono';
+  src: url('../assets/fonts/SpaceMono-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-White: #ffffff;
 }
