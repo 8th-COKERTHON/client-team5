@@ -28,10 +28,20 @@ export const Mvp2Page = () => {
     setSheetMode('friends');
   };
 
+  const handleDeleteFriend = (friendId: string) => {
+    setFriends((currentFriends) =>
+      currentFriends.filter((friend) => friend.id !== friendId),
+    );
+  };
+
   return (
     <HomeScreen>
       {sheetMode === 'friends' ? (
-        <FriendSheet friends={friends} onInvite={handleOpenInvite} />
+        <FriendSheet
+          friends={friends}
+          onDeleteFriend={handleDeleteFriend}
+          onInvite={handleOpenInvite}
+        />
       ) : (
         <CompanionSearchSheet
           result={mockCompanionSearchResult}
