@@ -5,8 +5,6 @@ import { useSleepStore } from '../../stores/useSleepStore';
 import arrowLeftIcon from '../../assets/icons/arrow-left.svg';
 import ticketBackgroundImage from '../../assets/images/ticket-background.svg';
 
-const CARD_WIDTH = 342;
-const CARD_HEIGHT = 563;
 const BARCODE_WIDTH = 267.64;
 const BARCODE_HEIGHT = 66.91;
 const BARCODE_BOTTOM_OFFSET = 13;
@@ -109,7 +107,7 @@ const ResultScreen = () => {
         </p>
       </div>
 
-      {/* 보딩패스 카드: 342x563 고정, svg가 테두리/라운드까지 전부 그림 */}
+      {/* 보딩패스 카드: 346x583 비율 고정, svg가 테두리/라운드까지 전부 그림 */}
       <div
         className="relative mx-auto w-full"
         style={{
