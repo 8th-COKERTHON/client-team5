@@ -7,9 +7,10 @@ const actionButtonClass =
 
 interface HomeScreenProps {
   children?: ReactNode;
+  onOpenFriends: () => void;
 }
 
-export const HomeScreen = ({ children }: HomeScreenProps) => {
+export const HomeScreen = ({ children, onOpenFriends }: HomeScreenProps) => {
   return (
     <main className="min-h-screen bg-[#050814] px-4 py-6">
       <section className="relative mx-auto min-h-[52.75rem] w-full max-w-[24.375rem] overflow-hidden bg-[#0d2571] text-white shadow-2xl">
@@ -24,7 +25,8 @@ export const HomeScreen = ({ children }: HomeScreenProps) => {
           <button
             type="button"
             className="flex size-[2.125rem] items-center justify-center text-[2.125rem] leading-none text-[#cbdaf8]"
-            aria-label="동행자 추가"
+            aria-label="동행자 보기"
+            onClick={onOpenFriends}
           >
             +
           </button>

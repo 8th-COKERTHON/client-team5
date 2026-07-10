@@ -5,12 +5,22 @@ import { HomeScreen } from './components/HomeScreen';
 import { mockCompanionSearchResult, mockFriends } from './mocks/friends';
 import type { Friend } from './types/friend';
 
+type SheetMode = 'friends' | 'search' | 'hidden';
+
 export const Mvp2Page = () => {
-  const [sheetMode, setSheetMode] = useState<'friends' | 'search'>('friends');
+  const [sheetMode, setSheetMode] = useState<SheetMode>('friends');
   const [friends, setFriends] = useState<Friend[]>(mockFriends);
+
+  const handleOpenFriends = () => {
+    setSheetMode('friends');
+  };
 
   const handleOpenInvite = () => {
     setSheetMode('search');
+  };
+
+  const handleCloseSheet = () => {
+    setSheetMode('hidden');
   };
 
   const handleAddCompanion = (friend: Friend) => {
@@ -35,17 +45,20 @@ export const Mvp2Page = () => {
   };
 
   return (
-    <HomeScreen>
-      {sheetMode === 'friends' ? (
+    <HomeScreen onOpenFriends={handleOpenFriends}>
+      {sheetMode === 'friends' && (
         <FriendSheet
           friends={friends}
+          onClose={handleCloseSheet}
           onDeleteFriend={handleDeleteFriend}
           onInvite={handleOpenInvite}
         />
-      ) : (
+      )}
+      {sheetMode === 'search' && (
         <CompanionSearchSheet
           result={mockCompanionSearchResult}
           onAddCompanion={handleAddCompanion}
+          onClose={handleCloseSheet}
         />
       )}
     </HomeScreen>
