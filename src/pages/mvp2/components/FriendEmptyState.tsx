@@ -1,9 +1,9 @@
+import emptyIcon from '@/assets/icons/empty.svg';
+
 export const FriendEmptyState = () => {
   return (
     <div className="flex flex-col items-center pt-[3.25rem] text-center">
-      <div className="flex size-[4.875rem] items-center justify-center rounded-full border-2 border-dashed border-[#b7b7b7] text-[1.75rem] text-[#b7b7b7]">
-        ♙
-      </div>
+      <img src={emptyIcon} alt="" className="size-[4.875rem]" />
       <strong className="mt-4 text-[1.0625rem] font-medium leading-[1.6] text-[#121212]">
         아직 함께하는 친구가 없어요.
       </strong>

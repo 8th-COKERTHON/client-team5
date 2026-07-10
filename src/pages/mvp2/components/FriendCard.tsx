@@ -61,7 +61,7 @@ export const FriendCard = ({ friend, onDelete }: FriendCardProps) => {
   };
 
   return (
-    <div className="relative h-[6.125rem] overflow-hidden rounded-[0.625rem]">
+    <div className="relative h-[6.125rem] rounded-[0.625rem]">
       <button
         type="button"
         className="absolute right-0 top-0 flex h-full w-[5.5625rem] items-center justify-center rounded-lg bg-[#f3f3f3] shadow-[0_4px_20px_rgba(18,18,18,0.05)]"

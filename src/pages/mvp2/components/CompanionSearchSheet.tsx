@@ -62,7 +62,7 @@ export const CompanionSearchSheet = ({
 
   return (
     <section
-      className="absolute bottom-0 left-0 right-0 h-[22.8125rem] rounded-t-[1.875rem] border border-[#e0e0e0] bg-white px-9 pt-[3.1875rem] shadow-[0_4px_20px_rgba(18,18,18,0.05)] transition-transform duration-200"
+      className="absolute bottom-0 left-0 right-0 z-30 h-[22.8125rem] rounded-t-[1.875rem] border border-[#e0e0e0] bg-white px-9 pt-[3.1875rem] shadow-[0_4px_20px_rgba(18,18,18,0.05)] transition-transform duration-200"
       style={{ transform: `translateY(${translateY}px)` }}
     >
       <button
