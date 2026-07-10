@@ -22,3 +22,14 @@ export const mockFriends: Friend[] = [
     lastRecordedAtLabel: '마지막 기록 오늘 08:20',
   },
 ];
+
+export const mockCompanionSearchResult: Friend = {
+  id: 'minju',
+  name: '민주',
+  avatar: '🧑🏻‍🚀',
+  cityCode: 'BANGKOK',
+  countryName: '태국',
+  cityName: '방콕',
+  offsetFromSeoul: -2,
+  lastRecordedAtLabel: '마지막 기록 없음',
+};
