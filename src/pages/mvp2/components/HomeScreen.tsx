@@ -9,6 +9,17 @@ const actionButtonClass =
 const menuItemClass =
   'block w-full text-center font-["Pretendard"] text-[1.0625rem] font-medium leading-[1.00975rem] text-white';
 
+const BACKGROUND_MUSIC_CONSENT_KEY = 'backgroundMusicConsent';
+const BACKGROUND_MUSIC_TOGGLE_EVENT = 'backgroundMusicToggle';
+
+const MUSIC_DIALOG_TEXT = {
+  messageLine1: '\uBC30\uACBD\uC74C\uC545\uC744',
+  messageSuffix: ' \uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?',
+  cancel: '\uCDE8\uC18C',
+} as const;
+
+type MusicDialogAction = 'on' | 'off';
+
 interface HomeScreenProps {
   children?: ReactNode;
   isSheetOpen?: boolean;
@@ -25,6 +36,9 @@ export const HomeScreen = ({
   const navigate = useNavigate();
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isLogoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [isMusicDialogOpen, setMusicDialogOpen] = useState(false);
+  const [musicDialogAction, setMusicDialogAction] =
+    useState<MusicDialogAction>('on');
   const [isLoggedIn, setLoggedIn] = useState(() =>
     Boolean(localStorage.getItem('accessToken')),
   );
@@ -64,6 +78,27 @@ export const HomeScreen = ({
     localStorage.removeItem('grantType');
     setLoggedIn(false);
     setLogoutDialogOpen(false);
+  };
+
+  const handleToggleMusic = () => {
+    const storedConsent = localStorage.getItem(BACKGROUND_MUSIC_CONSENT_KEY);
+    const nextAction = storedConsent === 'yes' ? 'off' : 'on';
+
+    setMenuOpen(false);
+    setMusicDialogAction(nextAction);
+    setMusicDialogOpen(true);
+  };
+
+  const handleCancelMusicDialog = () => {
+    setMusicDialogOpen(false);
+  };
+
+  const handleConfirmMusicDialog = () => {
+    const nextConsent = musicDialogAction === 'on' ? 'yes' : 'no';
+
+    localStorage.setItem(BACKGROUND_MUSIC_CONSENT_KEY, nextConsent);
+    window.dispatchEvent(new Event(BACKGROUND_MUSIC_TOGGLE_EVENT));
+    setMusicDialogOpen(false);
   };
 
   return (
@@ -111,8 +146,12 @@ export const HomeScreen = ({
               >
                 {isLoggedIn ? '로그아웃' : '로그인하기'}
               </button>
-              <button type="button" className={menuItemClass}>
-                알림 on/off
+              <button
+                type="button"
+                className={menuItemClass}
+                onClick={handleToggleMusic}
+              >
+              음악 on/off
               </button>
               <button type="button" className={menuItemClass}>
                 개인정보
@@ -173,6 +212,36 @@ export const HomeScreen = ({
                   onClick={handleConfirmLogout}
                 >
                   로그아웃
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {isMusicDialogOpen && (
+          <div className="absolute inset-0 z-50 bg-[rgba(18,18,18,0.5)] backdrop-blur-[2.5px]">
+            <section className="absolute left-1/2 top-[21.4375rem] h-[10.5625rem] w-[21.5rem] -translate-x-1/2 rounded-[0.9375rem] border border-[#cbdaf8] bg-white px-[2.1875rem] py-[2.125rem] text-[#121212] shadow-[0_0.25rem_1.25rem_rgba(254,215,165,0.05)]">
+              <p className="text-center text-[1.125rem] font-medium leading-6">
+                {MUSIC_DIALOG_TEXT.messageLine1}
+                <br />
+                {musicDialogAction}
+                {MUSIC_DIALOG_TEXT.messageSuffix}
+              </p>
+
+              <div className="mt-[1.0625rem] flex gap-[1.0625rem]">
+                <button
+                  type="button"
+                  className="h-9 w-[8.0625rem] rounded-[0.4375rem] border border-[#e6e6e6] bg-white text-[0.9375rem] font-medium leading-6 text-[#707070]"
+                  onClick={handleCancelMusicDialog}
+                >
+                  {MUSIC_DIALOG_TEXT.cancel}
+                </button>
+                <button
+                  type="button"
+                  className="h-9 w-[8.0625rem] rounded-[0.4375rem] bg-[#0d2571] text-[0.9375rem] font-medium leading-6 text-white"
+                  onClick={handleConfirmMusicDialog}
+                >
+                  {musicDialogAction}
                 </button>
               </div>
             </section>
