@@ -7,12 +7,16 @@ import { mockCompanionSearchResult, mockFriends } from './mocks/friends';
 import type { Friend } from './types/friend';
 
 type SheetMode = 'friends' | 'search' | 'hidden';
+type FriendSheetEntryMotion = 'slide' | 'settle';
 
 export const Mvp2Page = () => {
   const [sheetMode, setSheetMode] = useState<SheetMode>('friends');
+  const [friendSheetEntryMotion, setFriendSheetEntryMotion] =
+    useState<FriendSheetEntryMotion>('slide');
   const [friends, setFriends] = useState<Friend[]>(mockFriends);
 
   const handleOpenFriends = () => {
+    setFriendSheetEntryMotion('slide');
     setSheetMode('friends');
   };
 
@@ -25,6 +29,7 @@ export const Mvp2Page = () => {
   };
 
   const handleAddCompanion = (friend: Friend) => {
+    setFriendSheetEntryMotion('settle');
     setFriends((currentFriends) => {
       const hasFriend = currentFriends.some(
         (currentFriend) => currentFriend.id === friend.id,
@@ -55,6 +60,7 @@ export const Mvp2Page = () => {
         {sheetMode === 'friends' && (
           <FriendSheet
             key="friends"
+            entryMotion={friendSheetEntryMotion}
             friends={friends}
             onClose={handleCloseSheet}
             onDeleteFriend={handleDeleteFriend}

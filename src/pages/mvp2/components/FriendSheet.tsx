@@ -5,6 +5,7 @@ import { FriendCard } from './FriendCard';
 import { FriendEmptyState } from './FriendEmptyState';
 
 interface FriendSheetProps {
+  entryMotion?: 'slide' | 'settle';
   friends: Friend[];
   onClose: () => void;
   onDeleteFriend: (friendId: string) => void;
@@ -16,6 +17,7 @@ const CLOSE_VELOCITY = 600;
 const DRAG_LIMIT = 180;
 
 export const FriendSheet = ({
+  entryMotion = 'slide',
   friends,
   onClose,
   onDeleteFriend,
@@ -23,6 +25,11 @@ export const FriendSheet = ({
 }: FriendSheetProps) => {
   const dragControls = useDragControls();
   const hasFriends = friends.length > 0;
+  const initialY = entryMotion === 'slide' ? '100%' : 24;
+  const sheetTransition =
+    entryMotion === 'slide'
+      ? { type: 'spring' as const, stiffness: 420, damping: 36, mass: 0.8 }
+      : { type: 'tween' as const, duration: 0.18, ease: 'easeOut' as const };
 
   const handleDragEnd = (
     _event: MouseEvent | TouchEvent | PointerEvent,
@@ -52,11 +59,11 @@ export const FriendSheet = ({
       dragListener={false}
       dragMomentum={false}
       dragSnapToOrigin
-      initial={{ y: '100%' }}
+      initial={{ y: initialY }}
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       onDragEnd={handleDragEnd}
-      transition={{ type: 'spring', stiffness: 420, damping: 36, mass: 0.8 }}
+      transition={sheetTransition}
     >
       <button
         type="button"
