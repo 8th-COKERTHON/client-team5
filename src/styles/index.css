@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+@theme {
+  --color-White: #ffffff;
+}
+
 :root {
   font-family:
     Pretendard,
