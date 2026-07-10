@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ApiError, signup } from '@/api/auth';
 import arrowLeftIcon from '@/assets/icons/arrow-left.svg';
 
 const fieldClassName =
@@ -13,6 +14,8 @@ const SignupPage = () => {
   const [nickname, setNickname] = useState('');
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setLoading] = useState(false);
 
   const handleBackClick = () => {
     navigate(-1);
@@ -22,8 +25,42 @@ const SignupPage = () => {
     // 아이디 중복확인 API가 추가되면 연결 예정
   };
 
-  const handleSignup = () => {
-    // 회원가입 API 연동 예정
+  const handleSignup = async () => {
+    if (isLoading) {
+      return;
+    }
+
+    if (!nickname.trim() || !userId.trim() || !password.trim()) {
+      setErrorMessage('닉네임, 아이디, 비밀번호를 모두 입력해주세요.');
+      return;
+    }
+
+    setErrorMessage('');
+    setLoading(true);
+
+    try {
+      await signup({
+        id: userId.trim(),
+        password,
+        nickname: nickname.trim(),
+      });
+
+      navigate('/login');
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.code === 'MEMBER_409_001') {
+          setErrorMessage('이미 사용 중인 아이디입니다.');
+          return;
+        }
+
+        setErrorMessage(error.message);
+        return;
+      }
+
+      setErrorMessage('회원가입 중 문제가 발생했어요.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLoginClick = () => {
@@ -102,11 +139,18 @@ const SignupPage = () => {
 
       <button
         type="button"
-        className="absolute bottom-[4.9375rem] left-6 right-6 h-[3.5625rem] rounded-lg bg-[#b7b7b7] text-[1.125rem] font-medium leading-[1.4375rem] text-white"
+        className="absolute bottom-[4.9375rem] left-6 right-6 h-[3.5625rem] rounded-lg bg-[#6483d3] text-[1.125rem] font-medium leading-[1.4375rem] text-white disabled:cursor-not-allowed disabled:bg-[#b7b7b7]"
         onClick={handleSignup}
+        disabled={isLoading}
       >
-        가입하기
+        {isLoading ? '가입 중' : '가입하기'}
       </button>
+
+      {errorMessage && (
+        <p className="absolute bottom-[8.875rem] left-6 right-6 text-[0.8125rem] leading-[1.2rem] text-[#d93f3f]">
+          {errorMessage}
+        </p>
+      )}
 
       <div className="absolute bottom-[2.5rem] left-1/2 flex -translate-x-1/2 items-center gap-[0.8125rem]">
         <span className="whitespace-nowrap text-[0.8125rem] font-medium leading-[1.21875rem] text-[#b7b7b7]">
