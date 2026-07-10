@@ -1,5 +1,5 @@
 // MVP3-1 화면
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import backIcon from '@/assets/icons/back.svg';
 import closeIcon from '@/assets/icons/close.svg';
@@ -12,11 +12,13 @@ import ReturnRouteOverview from './components/ReturnRouteOverview';
 import ReturnTicketPage from './components/ReturnTicketPage';
 import { MOCK_RETURN_ROUTE } from './mocks/returnRoute';
 
+const SleepGlobeTransition = lazy(() => import('./components/SleepGlobeTransition'));
+
 const ReturnRoutePage = () => {
   const navigate = useNavigate();
   const [isHelpOpen, setHelpOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<
-    'setup' | 'overview' | 'ticket' | 'guide' | 'boarding'
+    'setup' | 'overview' | 'ticket' | 'guide' | 'boarding' | 'sleep-transition'
   >('setup');
 
   const handleHelpClick = () => setHelpOpen((isOpen) => !isOpen);
@@ -57,7 +59,16 @@ const ReturnRoutePage = () => {
       <BoardingCompletePage
         onBack={() => setCurrentStep('guide')}
         onClose={handleClose}
+        onSleep={() => setCurrentStep('sleep-transition')}
       />
+    );
+  }
+
+  if (currentStep === 'sleep-transition') {
+    return (
+      <Suspense fallback={<main className="h-full w-full bg-[#071846]" />}>
+        <SleepGlobeTransition onComplete={handleClose} />
+      </Suspense>
     );
   }
 

@@ -10,6 +10,7 @@ import MobileStatusBar from './MobileStatusBar';
 interface BoardingCompletePageProps {
   onBack: () => void;
   onClose: () => void;
+  onSleep: () => void;
 }
 
 const INITIAL_CHECKLIST = [
@@ -19,7 +20,7 @@ const INITIAL_CHECKLIST = [
   { itemId: 4, title: '알람 설정하기', isChecked: false },
 ];
 
-const BoardingCompletePage = ({ onBack, onClose }: BoardingCompletePageProps) => {
+const BoardingCompletePage = ({ onBack, onClose, onSleep }: BoardingCompletePageProps) => {
   const [checklist, setChecklist] = useState(INITIAL_CHECKLIST);
 
   const handleChecklistClick = (itemId: number) => {
@@ -126,6 +127,7 @@ const BoardingCompletePage = ({ onBack, onClose }: BoardingCompletePageProps) =>
 
         <button
           type="button"
+          onClick={onSleep}
           className="mt-auto h-[52px] w-full shrink-0 rounded-[8px] bg-[#0D2571] px-5 text-[15px] leading-[22.5px] font-medium text-white shadow-[0_4px_20px_rgba(18,18,18,0.05)] transition hover:bg-[#102b77]"
         >
           이제 잘게요
