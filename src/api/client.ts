@@ -1,5 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-import { getOrCreateDeviceId } from '../utils/devideId';
+import { getOrCreateDeviceId } from '../utils/deviceId';
+import { getOrCreateUserId, setUserId } from '../utils/userId';
 
 interface ApiResponse<TData> {
   success: boolean;
@@ -59,6 +60,16 @@ const getRequestHeaders = (headers?: HeadersInit) => {
   return requestHeaders;
 };
 
+// data에 userId가 실려오면 로컬 저장소 값을 서버 확정 값으로 갱신
+const syncUserIdFromResponseData = (data: unknown): void => {
+  if (data && typeof data === 'object' && 'userId' in data) {
+    const responseUserId = (data as { userId?: unknown }).userId;
+    if (typeof responseUserId === 'string' && responseUserId.length > 0) {
+      setUserId(responseUserId);
+    }
+  }
+};
+
 export const apiRequest = async <TResponse>(
   path: string,
   options: RequestInit = {},
@@ -79,6 +90,8 @@ export const apiRequest = async <TResponse>(
   }
 
   const result = (await response.json()) as ApiResponse<TResponse>;
+
+  syncUserIdFromResponseData(result.data);
 
   return result.data;
 };
@@ -107,6 +120,9 @@ export const apiRequestWithGuestFallback = async <TResponse>(
 ): Promise<TResponse> => {
   const headers = getRequestHeaders(options.headers);
   const accessToken = getAccessToken();
+
+  // userId는 로그인 여부와 무관하게 항상 전송 (없으면 새로 생성해서 전송)
+  headers.set('X-User-Id', getOrCreateUserId());
 
   if (accessToken) {
     headers.set('Authorization', `Bearer ${accessToken}`);
