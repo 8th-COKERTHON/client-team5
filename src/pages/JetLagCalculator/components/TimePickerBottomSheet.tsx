@@ -4,7 +4,7 @@ import { motion, type PanInfo } from 'framer-motion';
 
 const PERIOD_OPTIONS = ['오전', '오후'] as const;
 const HOUR_OPTIONS = Array.from({ length: 12 }, (_, index) => index + 1);
-const MINUTE_OPTIONS = ['00', '10', '20', '30', '40', '50'];
+const MINUTE_OPTIONS = ['00', '30'];
 const DRAG_CLOSE_THRESHOLD_PX = 120;
 const DRAG_CLOSE_VELOCITY = 500;
 
@@ -176,7 +176,7 @@ export const TimePickerBottomSheet = ({
         </div>
 
         <p className="mt-[0.75rem] w-full text-center text-[0.75rem] text-[#9CA3AF]">
-          10분 단위 선택
+          30분 단위 선택
         </p>
 
         <button
