@@ -23,6 +23,7 @@ interface GlobeBackgroundProps {
   focusLat?: number;
   focusLng?: number;
   autoRotate?: boolean;
+  className?: string;
   backgroundColor?: string;
   atmosphereColor?: string;
   atmosphereAltitude?: number;
@@ -37,6 +38,7 @@ export default function GlobeBackground({
   focusLat,
   focusLng,
   autoRotate = true,
+  className = 'absolute inset-0 -z-10 overflow-hidden',
   backgroundColor = 'rgba(0,0,0,0)',
   atmosphereColor = '#3a7bd5',
   atmosphereAltitude = 0.22,
@@ -76,7 +78,7 @@ export default function GlobeBackground({
   };
 
   return (
-    <div ref={ref} className="absolute inset-0 -z-10 overflow-hidden">
+    <div ref={ref} className={className}>
       {size.width > 0 && (
         <>
           <div
