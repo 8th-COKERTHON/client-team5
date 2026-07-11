@@ -182,6 +182,7 @@ const ReturnRoutePage = () => {
           <button
             type="button"
             aria-label="이전 화면"
+            onClick={() => navigate('/')}
             className="flex h-11 w-11 items-center justify-center rounded-full text-[#102149] transition hover:bg-[#f2f5fb]"
           >
             <img src={backIcon} alt="" className="h-5 w-5" />
