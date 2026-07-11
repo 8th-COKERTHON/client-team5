@@ -1,4 +1,4 @@
-// components/AirplaneRoute.tsx
+// components/AirPlaneAnimation.tsx
 import { useEffect, useRef, useState } from 'react';
 import { animate, useMotionValue } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -21,7 +21,7 @@ interface AirplaneRouteProps {
   onBeforeNavigate?: () => void;
 }
 
-export const AirplaneRoute = ({
+export const AirPlaneAnimation = ({
   navigateTo,
   isAutoPlay = true,
   onBeforeNavigate,

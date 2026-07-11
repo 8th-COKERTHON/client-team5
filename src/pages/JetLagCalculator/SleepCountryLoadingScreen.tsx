@@ -1,5 +1,5 @@
 import GlobeBackground from './components/GlobeBackground';
-import { AirplaneRoute } from './components/AirPlaneRoute';
+import { AirPlaneAnimation } from './components/AirPlaneAnimation';
 
 const GLOBE_ALTITUDE = 1.2;
 const GLOBE_FOCUS_LAT = 10;
@@ -17,7 +17,7 @@ const SleepCountryLoadingScreen = () => {
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-[1.5rem]">
         {/* 비행기 애니메이션 */}
-        <AirplaneRoute navigateTo="/jetlag/result" />
+        <AirPlaneAnimation navigateTo="/jetlag/result" />
 
         <div className="mt-[2rem] inline-flex flex-col items-start font-['Pretendard']">
           <h1 className="text-center text-[1.5rem] leading-[2.1rem] font-bold text-[color:var(--White,#FFF)]">
