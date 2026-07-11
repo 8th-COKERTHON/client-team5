@@ -59,7 +59,7 @@ const ResultScreen = () => {
   };
 
   const handleCloseClick = () => {
-    navigate('/jetlag/onboarding');
+    navigate('/');
   };
 
   const handleShareClick = () => {
