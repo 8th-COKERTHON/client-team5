@@ -1,11 +1,23 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import GlobeBackground from './components/GlobeBackground';
-import { PrimaryButton } from './components/PrimaryButton';
 
 const GLOBE_ALTITUDE = 1.2;
 const GLOBE_FOCUS_LAT = 10;
 const GLOBE_FOCUS_LNG = 20;
+const AUTO_NAVIGATE_DELAY_MS = 3000;
 
 const OnboardingScreen = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate('/jetlag/current-sleep-time');
+    }, AUTO_NAVIGATE_DELAY_MS);
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   return (
     <div className="relative z-0 flex h-full w-full flex-col justify-end">
       {/* 배경 지구본 */}
@@ -15,7 +27,7 @@ const OnboardingScreen = () => {
         focusLng={GLOBE_FOCUS_LNG}
       />
 
-      <div className="relative z-10 flex flex-1 items-center justify-center px-[1.5rem]">
+      <div className="relative z-10 flex flex-1 items-center justify-center px-[1.5rem] pb-[calc(env(safe-area-inset-bottom)+3.75rem)]">
         <div className="inline-flex flex-col items-start font-['Pretendard']">
           <h1 className="text-center text-[1.5rem] leading-[2.1rem] font-bold text-[color:var(--White,#FFF)]">
             내 수면시간
@@ -29,14 +41,6 @@ const OnboardingScreen = () => {
           </p>
         </div>
       </div>
-
-      <PrimaryButton
-        navigateTo="/jetlag/current-sleep-time"
-        wrapperClassName="fixed bottom-0 left-0 right-0 z-20 flex justify-center px-[1.25rem] pb-[calc(env(safe-area-inset-bottom)+3.75rem)]"
-        icon="→"
-      >
-        내 수면시차 확인하기
-      </PrimaryButton>
     </div>
   );
 };

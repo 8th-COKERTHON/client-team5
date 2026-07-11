@@ -1,5 +1,5 @@
 // pages/JetLagCalculator/ResultScreen.tsx
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSleepStore } from '../../stores/useSleepStore';
 import arrowLeftIcon from '../../assets/icons/arrow-left.svg';
@@ -13,26 +13,8 @@ const BARCODE_BAR_WIDTH_RATIOS = [
   2, 1, 3, 1, 2, 4, 1, 2, 1, 3, 2, 1, 4, 1, 2, 3, 1, 1, 2, 4, 1, 3, 2, 1, 2, 1, 4, 2, 1, 3, 1, 2,
 ];
 
-interface SleepCountryResult {
-  countryNameEn: string;
-  countryNameKo: string;
-  countryCode: string;
-  timeDifferenceHour: number;
-  isSlowerThanSeoul: boolean;
-}
-
-// TODO: 실제 시차/국가 매칭 알고리즘이 준비되면 이 mock을 store 계산 결과로 교체
-const MOCK_RESULT: SleepCountryResult = {
-  countryNameEn: 'NEW DELHI',
-  countryNameKo: '인도 뉴델리',
-  countryCode: 'DEL',
-  timeDifferenceHour: 3.5,
-  isSlowerThanSeoul: true,
-};
-
 const WEEKDAY_LABELS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
-// 오늘 날짜를 "2026.07.10 · FRI" 형식으로 변환
 const getCurrentDateLabel = (): string => {
   const today = new Date();
   const year = today.getFullYear();
@@ -44,22 +26,31 @@ const getCurrentDateLabel = (): string => {
 
 const ResultScreen = () => {
   const navigate = useNavigate();
+
+  const result = useSleepStore((state) => state.jetlagResult);
+  const errorMessage = useSleepStore((state) => state.jetlagError);
+
   const currentSleepTime = useSleepStore((state) => state.sleepTime);
   const currentWakeTime = useSleepStore((state) => state.wakeTime);
   const targetSleepTime = useSleepStore((state) => state.desiredSleepTime);
   const targetWakeTime = useSleepStore((state) => state.desiredWakeTime);
 
-  const result = MOCK_RESULT;
+  // 결과도 에러도 없이 이 화면에 직접 진입한 경우(새로고침 등)만 온보딩으로 되돌림
+  useEffect(() => {
+    if (!result && !errorMessage) {
+      navigate('/jetlag/onboarding', { replace: true });
+    }
+  }, [result, errorMessage, navigate]);
+
   const dateLabel = useMemo(() => getCurrentDateLabel(), []);
-  const timeDifferenceHourLabel = Math.floor(result.timeDifferenceHour);
-  const timeDifferenceMinuteLabel = Math.round((result.timeDifferenceHour % 1) * 60);
 
   const handleBackClick = () => {
     navigate(-1);
   };
 
   const handleCloseClick = () => {
-    navigate('/jetlag/onboarding');
+    localStorage.removeItem('deviceId');
+    navigate('/');
   };
 
   const handleShareClick = () => {
@@ -70,30 +61,83 @@ const ResultScreen = () => {
     navigate('/login');
   };
 
+  if (!result && !errorMessage) return null;
+
+  // 공통 헤더 (에러/정상 상태 모두 동일)
+  const header = (
+    <div className="flex h-[2.75rem] w-full flex-shrink-0 items-center justify-between">
+      <button
+        type="button"
+        onClick={handleBackClick}
+        aria-label="뒤로가기"
+        className="flex h-[2.25rem] w-[2.25rem] items-center justify-center"
+      >
+        <img src={arrowLeftIcon} alt="" width={20} height={20} />
+      </button>
+
+      <span className="text-[1rem] leading-[1.5rem] font-bold text-[#1A1A1A]">오늘의 항공권</span>
+
+      <button
+        type="button"
+        onClick={handleCloseClick}
+        aria-label="닫기"
+        className="flex h-[2.25rem] w-[2.25rem] items-center justify-center"
+      >
+        <CloseIcon />
+      </button>
+    </div>
+  );
+
+  // 공통 하단 버튼 (에러/정상 상태 모두 동일)
+  const bottomButtons = (
+    <div className="mt-[1.5rem] flex w-full gap-[0.75rem]">
+      <button
+        type="button"
+        onClick={handleShareClick}
+        className="flex flex-1 items-center justify-center gap-[0.5rem] rounded-[0.75rem] bg-[#0D2571] py-[0.875rem] text-[0.9375rem] font-semibold text-white"
+      >
+        <ShareIcon />
+        결과 공유하기
+      </button>
+      <button
+        type="button"
+        onClick={handleRetryClick}
+        className="flex flex-1 items-center justify-center gap-[0.5rem] rounded-[0.75rem] border border-[#E6E6E6] bg-white py-[0.875rem] text-[0.9375rem] font-semibold text-[#1A1A1A]"
+      >
+        <RefreshIcon />
+        다시 측정하기
+      </button>
+    </div>
+  );
+
+  // API 에러 상태: 보딩패스 카드 없이 안내 문구만 노출
+  if (errorMessage) {
+    return (
+      <div className="flex h-full w-full flex-col items-center overflow-y-auto bg-[#fff] px-[1.5rem] pt-[1rem] pb-[calc(env(safe-area-inset-bottom)+1.5rem)] font-['Pretendard']">
+        {header}
+
+        <div className="mt-[1rem] w-full">
+          <p className="text-[0.8125rem] leading-[1.25rem] text-[#707070]">현재 수면 리듬은</p>
+          <p className="mt-[0.25rem] text-[1.25rem] leading-[1.75rem] font-bold text-[#1A1A1A]">
+            {errorMessage}
+          </p>
+        </div>
+
+        <div className="flex-1" />
+
+        {bottomButtons}
+      </div>
+    );
+  }
+
+  // 정상 결과 상태 (여기서부터는 result가 확실히 존재)
+  const timeDifferenceHourLabel = Math.floor(result!.jetlagMinutes / 60);
+  const timeDifferenceMinuteLabel = result!.jetlagMinutes % 60;
+  const isSlowerThanSeoul = result!.direction === 'WEST';
+
   return (
     <div className="flex h-full w-full flex-col items-center overflow-y-auto bg-[#fff] px-[1.5rem] pt-[1rem] pb-[calc(env(safe-area-inset-bottom)+1.5rem)] font-['Pretendard']">
-      {/* 상단 헤더 */}
-      <div className="flex h-[2.75rem] w-full flex-shrink-0 items-center justify-between">
-        <button
-          type="button"
-          onClick={handleBackClick}
-          aria-label="뒤로가기"
-          className="flex h-[2.25rem] w-[2.25rem] items-center justify-center"
-        >
-          <img src={arrowLeftIcon} alt="" width={20} height={20} />
-        </button>
-
-        <span className="text-[1rem] leading-[1.5rem] font-bold text-[#1A1A1A]">오늘의 항공권</span>
-
-        <button
-          type="button"
-          onClick={handleCloseClick}
-          aria-label="닫기"
-          className="flex h-[2.25rem] w-[2.25rem] items-center justify-center"
-        >
-          <CloseIcon />
-        </button>
-      </div>
+      {header}
 
       {/* 상단 설명 텍스트 */}
       <div className="mt-[1rem] w-full">
@@ -103,11 +147,11 @@ const ResultScreen = () => {
           <span className="text-[#0D2571]">
             {timeDifferenceHourLabel}시간 {timeDifferenceMinuteLabel}분
           </span>{' '}
-          {result.isSlowerThanSeoul ? '느려요.' : '빨라요.'}
+          {isSlowerThanSeoul ? '느려요.' : '빨라요.'}
         </p>
       </div>
 
-      {/* 보딩패스 카드: 346x583 비율 고정, svg가 테두리/라운드까지 전부 그림 */}
+      {/* 보딩패스 카드 */}
       <div
         className="relative mx-auto w-full"
         style={{
@@ -123,7 +167,6 @@ const ResultScreen = () => {
         />
 
         <div className="relative z-10 flex h-full flex-col px-[2rem] pt-[1.75rem]">
-          {/* DATE 라벨 + 날짜 */}
           <div className="flex items-center justify-between">
             <span
               style={{
@@ -138,7 +181,6 @@ const ResultScreen = () => {
             >
               DATE
             </span>
-            <IndiaFlagIcon />
           </div>
 
           <span
@@ -155,7 +197,6 @@ const ResultScreen = () => {
             {dateLabel}
           </span>
 
-          {/* 국가명 */}
           <p
             className="mt-[1.25rem]"
             style={{
@@ -168,7 +209,7 @@ const ResultScreen = () => {
               letterSpacing: '0.9px',
             }}
           >
-            {result.countryNameEn}
+            {result!.to.cityNameEn}
           </p>
 
           <p
@@ -182,10 +223,9 @@ const ResultScreen = () => {
               lineHeight: '18px',
             }}
           >
-            {result.countryNameKo}
+            {result!.to.cityNameKr}
           </p>
 
-          {/* 국가 코드 배지 */}
           <span
             className="mt-[1rem] inline-flex w-fit items-center justify-center"
             style={{
@@ -205,11 +245,10 @@ const ResultScreen = () => {
                 letterSpacing: '0.977px',
               }}
             >
-              {result.countryCode}
+              {result!.to.airportCode}
             </span>
           </span>
 
-          {/* CURRENT SLEEP / TARGET SLEEP 라벨 */}
           <div className="mt-[1.5rem] flex gap-[0.5rem]">
             <span
               className="flex-1 rounded-[0.5rem] bg-[#F3F3F3] py-[0.375rem] text-center uppercase"
@@ -241,7 +280,6 @@ const ResultScreen = () => {
             </span>
           </div>
 
-          {/* 시간 비교 */}
           <div className="mt-[0.75rem] flex gap-[0.5rem]">
             <div className="flex flex-1 flex-col gap-[0.75rem]">
               <div>
@@ -359,7 +397,6 @@ const ResultScreen = () => {
           </div>
         </div>
 
-        {/* 바코드: 카드 하단에서 13px 위, 267.64 x 66.91 고정 크기 */}
         <div
           className="absolute left-1/2 flex items-center justify-center gap-[0.125rem] overflow-hidden"
           style={{
@@ -381,25 +418,7 @@ const ResultScreen = () => {
         </div>
       </div>
 
-      {/* 하단 버튼 */}
-      <div className="mt-[1.5rem] flex w-full gap-[0.75rem]">
-        <button
-          type="button"
-          onClick={handleShareClick}
-          className="flex flex-1 items-center justify-center gap-[0.5rem] rounded-[0.75rem] bg-[#0D2571] py-[0.875rem] text-[0.9375rem] font-semibold text-white"
-        >
-          <ShareIcon />
-          결과 공유하기
-        </button>
-        <button
-          type="button"
-          onClick={handleRetryClick}
-          className="flex flex-1 items-center justify-center gap-[0.5rem] rounded-[0.75rem] border border-[#E6E6E6] bg-white py-[0.875rem] text-[0.9375rem] font-semibold text-[#1A1A1A]"
-        >
-          <RefreshIcon />
-          다시 측정하기
-        </button>
-      </div>
+      {bottomButtons}
     </div>
   );
 };
@@ -428,15 +447,6 @@ const RefreshIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-  </svg>
-);
-
-const IndiaFlagIcon = () => (
-  <svg width="28" height="20" viewBox="0 0 28 20" fill="none">
-    <rect width="28" height="20" rx="2" fill="white" />
-    <rect width="28" height="6.67" fill="#FF9933" />
-    <rect y="13.33" width="28" height="6.67" fill="#138808" />
-    <circle cx="14" cy="10" r="2.2" fill="none" stroke="#000080" strokeWidth="0.4" />
   </svg>
 );
 
